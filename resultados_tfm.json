@@ -1,0 +1,93 @@
+{
+  "modelo_final": "XGBoost + Optuna",
+  "features": [
+    "CITY",
+    "CONSTRUCTEDAREA",
+    "ROOMNUMBER",
+    "BATHNUMBER",
+    "HASTERRACE",
+    "HASLIFT",
+    "HASAIRCONDITIONING",
+    "AMENITYID",
+    "HASPARKINGSPACE",
+    "HASNORTHORIENTATION",
+    "HASSOUTHORIENTATION",
+    "HASEASTORIENTATION",
+    "HASWESTORIENTATION",
+    "HASBOXROOM",
+    "HASWARDROBE",
+    "HASSWIMMINGPOOL",
+    "HASDOORMAN",
+    "HASGARDEN",
+    "ISDUPLEX",
+    "ISSTUDIO",
+    "ISINTOPFLOOR",
+    "FLOORCLEAN",
+    "FLATLOCATIONID",
+    "CADCONSTRUCTIONYEAR",
+    "CADMAXBUILDINGFLOOR",
+    "CADDWELLINGCOUNT",
+    "CADASTRALQUALITYID",
+    "BUILTTYPEID_1",
+    "BUILTTYPEID_2",
+    "BUILTTYPEID_3",
+    "DISTANCE_TO_CITY_CENTER",
+    "DISTANCE_TO_METRO",
+    "LONGITUDE",
+    "LATITUDE",
+    "BUILDING_AGE",
+    "AREA_PER_ROOM",
+    "FLOOR_RATIO",
+    "NEAR_METRO_500M",
+    "AMENITIES_COUNT"
+  ],
+  "mae_test": 48194.83233496512,
+  "rmse_test": 90698.7874989588,
+  "r2_test": 0.9330973065003112,
+  "p90_abs_error_eur": 109891.70000000013,
+  "n_final": 47841,
+  "n_madrid": 31325,
+  "n_barcelona": 16516,
+  "top_shap": [
+    {
+      "feature": "num__CONSTRUCTEDAREA",
+      "mean_abs_shap": 0.2704092562198639
+    },
+    {
+      "feature": "num__LATITUDE",
+      "mean_abs_shap": 0.13855697214603424
+    },
+    {
+      "feature": "num__DISTANCE_TO_CITY_CENTER",
+      "mean_abs_shap": 0.12865012884140015
+    },
+    {
+      "feature": "num__BATHNUMBER",
+      "mean_abs_shap": 0.06131249666213989
+    },
+    {
+      "feature": "num__LONGITUDE",
+      "mean_abs_shap": 0.06071385741233826
+    },
+    {
+      "feature": "num__HASLIFT",
+      "mean_abs_shap": 0.057006753981113434
+    },
+    {
+      "feature": "num__CADASTRALQUALITYID",
+      "mean_abs_shap": 0.035286106169223785
+    },
+    {
+      "feature": "num__AMENITIES_COUNT",
+      "mean_abs_shap": 0.03434206545352936
+    },
+    {
+      "feature": "num__AREA_PER_ROOM",
+      "mean_abs_shap": 0.030084146186709404
+    },
+    {
+      "feature": "num__ROOMNUMBER",
+      "mean_abs_shap": 0.028603795915842056
+    }
+  ]
+}
