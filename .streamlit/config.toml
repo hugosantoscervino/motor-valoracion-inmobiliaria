@@ -1,2 +1,9 @@
-[server]
-pythonVersion = "3.11"
+[theme]
+base = "light"
+primaryColor = "#0B4F3F"
+backgroundColor = "#F2F4F3"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#12211E"
+
+[client]
+toolbarMode = "minimal"
