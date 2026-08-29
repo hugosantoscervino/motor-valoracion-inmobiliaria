@@ -4,4 +4,5 @@ lightgbm==4.7.0
 joblib==1.5.3
 numpy
 pandas
+pillow
 streamlit
