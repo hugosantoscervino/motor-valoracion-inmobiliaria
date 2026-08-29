@@ -11,13 +11,23 @@ BASE = Path(__file__).resolve().parent
 st.set_page_config(page_title="VALORA · Cartografía del valor residencial",
                    layout="wide", initial_sidebar_state="collapsed")
 
-VOID, DEEP, RULE = "#06090C", "#0B1116", "#17232A"
-BONE, MUTE = "#EDEFEA", "#77878C"
-AMBER, AMBER_DIM = "#E39B3C", "#8A5F26"
+VOID, DEEP, RULE = "#0C1216", "#151D22", "#28353C"
+BONE, MUTE = "#F0F2EE", "#8FA0A6"
+AMBER, AMBER_DIM = "#F0A93F", "#A8762F"
 
 CENTRO = {"Madrid": (40.4168, -3.7038), "Barcelona": (41.3874, 2.1686)}
-STOPS = [(0.00, (10, 20, 32)), (0.30, (16, 64, 63)), (0.55, (28, 122, 98)),
-         (0.76, (184, 134, 58)), (0.91, (227, 155, 60)), (1.00, (247, 223, 180))]
+MAPA_W, MAPA_H = 660, 450          # lienzo del mapa (px de viewBox)
+DLA = 0.075                         # semiespán en latitud (~16,7 km de alto)
+NY = 52
+NX = int(round(NY * MAPA_W / MAPA_H))
+KM_LAT = 111.0
+
+
+def span_lon(la0):
+    """Semiespán en longitud que hace el mapa geométricamente correcto."""
+    return DLA * (MAPA_W / MAPA_H) / math.cos(math.radians(la0))
+STOPS = [(0.00, (26, 52, 66)), (0.25, (23, 86, 88)), (0.50, (36, 132, 106)),
+         (0.72, (163, 142, 73)), (0.88, (240, 169, 63)), (1.00, (250, 232, 200))]
 
 
 @st.cache_resource
@@ -67,11 +77,12 @@ def predecir(rows):
 
 
 @st.cache_data(show_spinner=False)
-def campo(city, area, rooms, baths, year, d_metro, ext, nx=76, ny=50):
+def campo(city, area, rooms, baths, year, d_metro, ext, nx=NX, ny=NY):
     """Superficie de precio del activo desplazado por toda la ciudad."""
     la0, lo0 = CENTRO[city]
-    las = np.linspace(la0 + 0.075, la0 - 0.075, ny)
-    los = np.linspace(lo0 - 0.098, lo0 + 0.098, nx)
+    dlo = span_lon(la0)
+    las = np.linspace(la0 + DLA, la0 - DLA, ny)
+    los = np.linspace(lo0 - dlo, lo0 + dlo, nx)
     LO, LA = np.meshgrid(los, las)
     dist = np.sqrt(((LA - la0) * 111.0) ** 2 +
                    ((LO - lo0) * 111.0 * math.cos(math.radians(la0))) ** 2)
@@ -159,22 +170,25 @@ html,body,[class*="css"]{{font-family:'Jost',sans-serif;color:{BONE}}}
  border-bottom:1px solid {RULE};margin-bottom:14px}}
 
 /* ── escena ── */
-.scene{{position:relative;border:1px solid {RULE};overflow:hidden;background:{DEEP};
- animation:unveil 1.3s cubic-bezier(.16,.84,.34,1) both}}
+.stage{{display:flex;gap:34px;align-items:stretch}}
+.scene{{position:relative;flex:1 1 62%;min-width:0;border:1px solid {RULE};
+ overflow:hidden;background-color:{DEEP};background-size:100% 100%;
+ background-repeat:no-repeat;aspect-ratio:{MAPA_W}/{MAPA_H};
+ animation:unveil 1.1s cubic-bezier(.16,.84,.34,1) both}}
 @keyframes unveil{{from{{clip-path:inset(0 100% 0 0)}}to{{clip-path:inset(0 0 0 0)}}}}
-.scene img{{display:block;width:100%;height:auto;filter:saturate(1.06) contrast(1.04)}}
-.scene .ov{{position:absolute;inset:0}}
-.scene .scrim{{position:absolute;inset:0;
- background:linear-gradient(100deg,{VOID}F2 0%,{VOID}D8 26%,{VOID}22 56%,transparent 74%)}}
-.iso{{fill:none;stroke:{BONE};stroke-width:.6;opacity:.16}}
-.iso.hi{{stroke:{AMBER};opacity:.34;stroke-width:.8}}
+.scene .ov{{position:absolute;inset:0;width:100%;height:100%}}
+.iso{{fill:none;stroke:#0C1216;stroke-width:.7;opacity:.30}}
+.iso.hi{{stroke:{BONE};opacity:.85;stroke-width:1.3}}
+.grat{{stroke:{BONE};opacity:.10;stroke-width:.5}}
+.anot{{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;fill:{BONE}}}
+.anot.dk{{fill:#0C1216}}
 
-.plate{{position:absolute;left:3.2%;top:50%;transform:translateY(-50%);max-width:46%}}
+.plate{{flex:0 0 34%;display:flex;flex-direction:column;justify-content:center;padding-right:6px}}
 .tag{{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.26em;
  text-transform:uppercase;color:{AMBER};margin-bottom:14px}}
-.val{{font-family:'Bodoni Moda',serif;font-size:5.6rem;line-height:.88;font-weight:400;
- letter-spacing:-.022em;color:{BONE};text-shadow:0 0 62px rgba(227,155,60,.30)}}
-.val sup{{font-size:2.1rem;font-weight:400;color:{AMBER};margin-left:8px;top:-1.9rem}}
+.val{{font-family:'Bodoni Moda',serif;font-size:4.4rem;line-height:.94;font-weight:400;
+ letter-spacing:-.02em;color:{BONE};display:flex;align-items:baseline;gap:9px}}
+.val em{{font-style:normal;font-size:1.7rem;color:{AMBER}}}
 .sq{{margin-top:20px;display:flex;gap:22px;flex-wrap:wrap}}
 .sq div{{border-left:1px solid {AMBER_DIM};padding-left:11px}}
 .sq .v{{font-family:'IBM Plex Mono',monospace;font-size:.95rem;color:{BONE}}}
@@ -187,9 +201,9 @@ html,body,[class*="css"]{{font-family:'Jost',sans-serif;color:{BONE}}}
 .lgd{{display:flex;align-items:center;gap:11px;margin-top:11px;
  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.16em;
  text-transform:uppercase;color:{MUTE}}}
-.lgd .bar{{flex:0 0 190px;height:5px;background:linear-gradient(90deg,
- rgb(10,20,32),rgb(16,64,63) 30%,rgb(28,122,98) 55%,rgb(184,134,58) 76%,
- rgb(227,155,60) 91%,rgb(247,223,180))}}
+.lgd .bar{{flex:0 0 190px;height:6px;background:linear-gradient(90deg,
+ rgb(26,52,66),rgb(23,86,88) 25%,rgb(36,132,106) 50%,rgb(163,142,73) 72%,
+ rgb(240,169,63) 88%,rgb(250,232,200))}}
 
 .prose{{font-family:'Bodoni Moda',serif;font-size:1.02rem;line-height:1.66;
  color:{MUTE};font-weight:400}}
@@ -225,9 +239,9 @@ html,body,[class*="css"]{{font-family:'Jost',sans-serif;color:{BONE}}}
 
 @media(max-width:1000px){{
  .block-container{{padding:1.3rem 1.1rem 3rem!important}}
- .plate{{position:static;transform:none;max-width:100%;padding:20px 18px 4px}}
- .scene .scrim{{background:linear-gradient(180deg,transparent 40%,{VOID}EE)}}
- .val{{font-size:3.1rem}}.val sup{{font-size:1.3rem;top:-1rem}}
+ .stage{{flex-direction:column;gap:20px}}
+ .plate{{flex:none;padding:0}}
+ .val{{font-size:3rem}}.val em{{font-size:1.2rem}}
  .diag{{flex-wrap:wrap}}.diag>div{{flex:1 0 50%;border-bottom:1px solid {RULE}}}
 }}
 </style>
@@ -276,51 +290,92 @@ Z = campo(city, area, rooms, baths, year, d_metro, ext)
 lo, hi = float(np.percentile(Z, 1)), float(np.percentile(Z, 99))
 b64 = campo_png(np.ascontiguousarray(Z).tobytes(), Z.shape, lo, hi)
 
-W, H = 1000, 340
+W, H = MAPA_W, MAPA_H
+dlo = span_lon(la0)
+KM_W = 2 * dlo * KM_LAT * math.cos(math.radians(la0))   # ancho real del mapa en km
+KM_H = 2 * DLA * KM_LAT
+
 niveles = list(np.linspace(lo, hi, 11))[1:-1]
 paths = isolineas(Z, niveles, W, H)
 prox = int(np.argmin([abs(n - precio) for n in niveles]))
 
-px = (d["LONGITUDE"] - (lo0 - 0.098)) / 0.196 * W
-py = ((la0 + 0.075) - la0) / 0.15 * H
+# posición del activo (se sitúa al este del centro, a d_center km)
+px = (d["LONGITUDE"] - (lo0 - dlo)) / (2 * dlo) * W
+py = H / 2
+cx, cy = W / 2, H / 2
 
-# ─────────────────────────────── escena ────────────────────────────────
-iso_svg = "".join(
-    f'<path class="iso{" hi" if i == prox else ""}" d="{p}"/>'
-    for i, p in enumerate(paths) if p)
+# ── anotación: dónde corta cada curva la horizontal central (hacia el este)
+fila = Z[Z.shape[0] // 2]
+def corte(lv):
+    for i in range(Z.shape[1] // 2, Z.shape[1] - 1):
+        a, b = fila[i], fila[i + 1]
+        if (a - lv) * (b - lv) <= 0 and a != b:
+            return (i + (lv - a) / (b - a)) / (Z.shape[1] - 1) * W
+    return None
+
+etiquetas = ""
+for i in (1, 4, 7):
+    xq = corte(niveles[i])
+    if xq and 26 < xq < W - 26:
+        etiquetas += (f'<text class="anot dk" x="{xq:.0f}" y="{cy-7:.0f}" '
+                      f'text-anchor="middle" opacity=".75">{compact(niveles[i])}</text>')
+
+# ── retícula, escala, norte
+grat = "".join(f'<line class="grat" x1="{W*i/6:.0f}" y1="0" x2="{W*i/6:.0f}" y2="{H}"/>'
+               for i in range(1, 6))
+grat += "".join(f'<line class="grat" x1="0" y1="{H*i/4:.0f}" x2="{W}" y2="{H*i/4:.0f}"/>'
+                for i in range(1, 4))
+
+km_bar = 5
+bar_px = km_bar / KM_W * W
+escala = (f'<g transform="translate(18,{H-20})">'
+          f'<line x1="0" y1="0" x2="{bar_px:.0f}" y2="0" stroke="{BONE}" stroke-width="1.6"/>'
+          f'<line x1="0" y1="-4" x2="0" y2="4" stroke="{BONE}" stroke-width="1.6"/>'
+          f'<line x1="{bar_px:.0f}" y1="-4" x2="{bar_px:.0f}" y2="4" stroke="{BONE}" '
+          f'stroke-width="1.6"/>'
+          f'<text class="anot" x="{bar_px/2:.0f}" y="-9" text-anchor="middle">{km_bar} km</text></g>')
+
+norte = (f'<g transform="translate({W-24},22)">'
+         f'<polygon points="0,-9 4.5,7 0,3.5 -4.5,7" fill="{BONE}" opacity=".85"/>'
+         f'<text class="anot" x="0" y="20" text-anchor="middle" opacity=".85">N</text></g>')
+
+centro = (f'<g opacity=".9"><line x1="{cx-7}" y1="{cy}" x2="{cx+7}" y2="{cy}" '
+          f'stroke="#0C1216" stroke-width="1.4"/>'
+          f'<line x1="{cx}" y1="{cy-7}" x2="{cx}" y2="{cy+7}" stroke="#0C1216" stroke-width="1.4"/>'
+          f'<text class="anot dk" x="{cx}" y="{cy+20}" text-anchor="middle">CENTRO</text></g>')
+
+iso_svg = "".join(f'<path class="iso{" hi" if i == prox else ""}" d="{p}"/>'
+                  for i, p in enumerate(paths) if p)
 
 st.markdown(f"""
-<div class="scene">
-  <img src="data:image/png;base64,{b64}" alt="Superficie de valor de {city}"/>
-  <svg class="ov" viewBox="0 0 {W} {H}" preserveAspectRatio="none">{iso_svg}</svg>
-  <svg class="ov" viewBox="0 0 {W} {H}">
-    <circle class="pin-halo" cx="{px:.1f}" cy="{py:.1f}" r="7" fill="none"
-            stroke="{AMBER}" stroke-width="1.4"/>
-    <circle cx="{px:.1f}" cy="{py:.1f}" r="4.6" fill="{AMBER}"/>
-    <circle cx="{px:.1f}" cy="{py:.1f}" r="4.6" fill="none" stroke="{VOID}" stroke-width="1.4"/>
-  </svg>
-  <div class="scrim"></div>
+<div class="stage">
   <div class="plate">
     <div class="tag">Valoración · {city}</div>
-    <div class="val">{num(precio)}<sup>€</sup></div>
+    <div class="val">{num(precio)}<em>€</em></div>
     <div class="sq">
       <div><div class="v">{eur(precio/area)}</div><div class="k">por m²</div></div>
       <div><div class="v">{num(area)} m²</div><div class="k">superficie</div></div>
       <div><div class="v">{2018-year}</div><div class="k">años</div></div>
       <div><div class="v">±{q/precio*100:.0f}%</div><div class="k">holgura</div></div>
     </div>
+    <div class="prose" style="font-size:.92rem;margin-top:22px;max-width:40ch">
+      El mapa muestra lo que valdría <b>este mismo activo</b> en cada punto de {city}:
+      de <b>{eur(lo)}</b> en la corona exterior a <b>{eur(hi)}</b> en el núcleo.
+      El anillo marca su emplazamiento actual.</div>
+  </div>
+  <div class="scene" style="background-image:url(data:image/png;base64,{b64})">
+    <svg class="ov" viewBox="0 0 {W} {H}" preserveAspectRatio="none">{grat}{iso_svg}</svg>
+    <svg class="ov" viewBox="0 0 {W} {H}">
+      {centro}{etiquetas}{escala}{norte}
+      <circle class="pin-halo" cx="{px:.1f}" cy="{py:.1f}" r="7" fill="none"
+              stroke="{BONE}" stroke-width="1.6"/>
+      <circle cx="{px:.1f}" cy="{py:.1f}" r="5" fill="{AMBER}" stroke="#0C1216" stroke-width="1.6"/>
+    </svg>
   </div>
 </div>
 <div class="lgd"><span class="bar"></span>
- <span>{compact(lo)} €</span><span style="flex:1"></span><span>{compact(hi)} €</span></div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""<div class="rise" style="margin-top:26px">
-<div class="prose" style="max-width:72ch">El mismo activo, desplazado por toda la plaza.
-La superficie recoge la valoración que el modelo asigna a una vivienda de
-<b>{num(area)} m²</b> en cada punto de {city}; las curvas de nivel separan tramos de
-<b>{eur((hi-lo)/10)}</b> y la resaltada marca el tramo en el que cae este activo.
-El rango va de <b>{eur(lo)}</b> en la corona exterior a <b>{eur(hi)}</b> en el núcleo.</div></div>
+ <span>{compact(lo)} €</span><span style="flex:1"></span><span>{compact(hi)} €</span>
+ <span style="flex:0 0 auto;opacity:.7">· valor del activo por emplazamiento</span></div>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────── curvas de respuesta ───────────────────────
