@@ -9,7 +9,7 @@ BASE = Path(__file__).resolve().parent
 st.set_page_config(
     page_title="VALORA · Valoración automatizada de activos residenciales",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ── TOKENS ────────────────────────────────────────────────────────────────
@@ -136,6 +136,12 @@ html, body, [class*="css"] {{ font-family: 'Archivo', sans-serif; color: {INK}; 
 /* — Panel lateral — */
 section[data-testid="stSidebar"] {{ background: {SURFACE}; border-right: 1px solid {LINE}; }}
 section[data-testid="stSidebar"] .block-container {{ padding-top: 1.5rem !important; }}
+.grp {{
+    font-family: 'IBM Plex Mono', monospace; font-size: .62rem; letter-spacing: .18em;
+    text-transform: uppercase; color: {MUTED}; padding-bottom: 7px;
+    border-bottom: 1px solid {LINE}; margin-bottom: 12px;
+}}
+[data-testid="stSidebarCollapsedControl"] {{ display: none; }}
 .sb-title {{
     font-family: 'IBM Plex Mono', monospace; font-size: .66rem; letter-spacing: .2em;
     text-transform: uppercase; color: {INK}; padding-bottom: 9px;
@@ -194,39 +200,50 @@ def compact(v):
     return f"{num(v/1000, 0)}k"
 
 
-# ── PANEL LATERAL ─────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown('<div class="sb-title">Parámetros del activo</div>', unsafe_allow_html=True)
+# ── CONTROLES ─────────────────────────────────────────────────────────────
+st.markdown(
+    '<div class="masthead"><div class="wordmark">Valora</div>'
+    '<div class="sub">Valoración automatizada · Mercado residencial español</div></div>',
+    unsafe_allow_html=True,
+)
 
-    st.markdown('<div class="sb-group">Localización</div>', unsafe_allow_html=True)
-    city = st.selectbox("Mercado", ["Madrid", "Barcelona"], label_visibility="visible")
+st.markdown('<div class="eyebrow">Parámetros del activo</div>', unsafe_allow_html=True)
+
+k1, k2, k3 = st.columns(3, gap="large")
+
+with k1:
+    st.markdown('<div class="grp">Localización</div>', unsafe_allow_html=True)
+    city = st.selectbox("Mercado", ["Madrid", "Barcelona"])
     d_center = st.slider("Distancia al centro (km)", 0.0, 30.0, 3.0, 0.1)
     d_metro = st.slider("Distancia al metro (km)", 0.0, 10.0, 0.4, 0.1)
 
-    lat_def, lon_def = (40.4168, -3.7038) if city == "Madrid" else (41.3874, 2.1686)
-    with st.expander("Coordenadas"):
-        lat = st.number_input("Latitud", value=float(lat_def), format="%.5f")
-        lon = st.number_input("Longitud", value=float(lon_def), format="%.5f")
-
-    st.markdown('<div class="sb-group">Superficie y distribución</div>', unsafe_allow_html=True)
+with k2:
+    st.markdown('<div class="grp">Superficie y distribución</div>', unsafe_allow_html=True)
     area = st.slider("Superficie construida (m²)", 20, 500, 90)
-    c1, c2 = st.columns(2)
-    rooms = c1.number_input("Habitaciones", 0, 15, 3)
-    baths = c2.number_input("Baños", 0, 10, 2)
     year = st.slider("Año de construcción", 1900, 2018, 1970)
+    r1, r2 = st.columns(2)
+    rooms = r1.number_input("Habitaciones", 0, 15, 3)
+    baths = r2.number_input("Baños", 0, 10, 2)
 
-    st.markdown('<div class="sb-group">Dotaciones</div>', unsafe_allow_html=True)
-    e1, e2 = st.columns(2)
-    lift = e1.checkbox("Ascensor", value=True)
-    terrace = e2.checkbox("Terraza")
-    parking = e1.checkbox("Parking")
-    air = e2.checkbox("Climatización")
-    pool = e1.checkbox("Piscina")
-    doorman = e2.checkbox("Portería")
-
-    st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
+with k3:
+    st.markdown('<div class="grp">Dotaciones</div>', unsafe_allow_html=True)
+    d1, d2 = st.columns(2)
+    lift = d1.checkbox("Ascensor", value=True)
+    terrace = d2.checkbox("Terraza")
+    parking = d1.checkbox("Parking")
+    air = d2.checkbox("Climatización")
+    pool = d1.checkbox("Piscina")
+    doorman = d2.checkbox("Portería")
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     calcular = st.button("Calcular valoración")
 
+lat_def, lon_def = (40.4168, -3.7038) if city == "Madrid" else (41.3874, 2.1686)
+with st.expander("Coordenadas exactas"):
+    q1, q2, _ = st.columns([1, 1, 2])
+    lat = q1.number_input("Latitud", value=float(lat_def), format="%.5f")
+    lon = q2.number_input("Longitud", value=float(lon_def), format="%.5f")
+
+st.markdown("<div style='height:30px'></div>", unsafe_allow_html=True)
 
 # ── MODELO ────────────────────────────────────────────────────────────────
 def fila(area_m2, dist_centro):
@@ -377,13 +394,6 @@ def bonito(f):
     limpio = f.replace("num__", "").replace("cat__", "").split("_Madrid")[0]
     return ETIQUETAS.get(limpio, limpio.replace("_", " ").capitalize())
 
-
-# ── CABECERA ──────────────────────────────────────────────────────────────
-st.markdown(
-    '<div class="masthead"><div class="wordmark">Valora</div>'
-    '<div class="sub">Valoración automatizada · Mercado residencial español</div></div>',
-    unsafe_allow_html=True,
-)
 
 # ── VALORACIÓN ────────────────────────────────────────────────────────────
 if calcular:
