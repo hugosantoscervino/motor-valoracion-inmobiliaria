@@ -1,0 +1,52 @@
+{
+ "fecha": "agosto de 2026",
+ "fecha_corta": "ago-2026",
+ "fuente": "idealista · informe de precios de vivienda en venta",
+ "nota": "Precio medio de oferta en euros por metro cuadrado. Para actualizar, sustituye los números por los del mes corriente y cambia la fecha. No hace falta reentrenar nada.",
+ "ciudades": {
+  "Madrid": {
+   "_ciudad": 6471,
+   "Salamanca": 10841,
+   "Chamberí": 9209,
+   "Retiro": 8467,
+   "Chamartín": 8222,
+   "Centro": 7745,
+   "Arganzuela": 6346,
+   "Moncloa": 6332,
+   "Fuencarral": 5610,
+   "Hortaleza": 5483,
+   "Ciudad Lineal": 5201,
+   "Barajas": 5171,
+   "Moratalaz": 4563,
+   "Latina": 4044,
+   "Carabanchel": 3842,
+   "Puente de Vallecas": 3480
+  },
+  "Barcelona": {
+   "_ciudad": 5440,
+   "Sarrià-Sant Gervasi": 7167,
+   "Les Corts": 6670,
+   "Eixample": 6648,
+   "Gràcia": 5670,
+   "Sant Martí": 5352,
+   "Ciutat Vella": 4841,
+   "Sants-Montjuïc": 4592,
+   "Horta-Guinardó": 4177,
+   "Sant Andreu": 4024,
+   "Nou Barris": 3270
+  },
+  "Valencia": {
+   "_ciudad": 3469,
+   "L'Eixample": 5213,
+   "Ciutat Vella": 4840,
+   "El Pla del Real": 4359,
+   "Extramurs": 3792,
+   "Campanar": 3488,
+   "Algirós": 3449,
+   "Camins al Grau": 3401,
+   "Benimaclet": 3393,
+   "Poblats Marítims": 3386,
+   "Quatre Carreres": 3203
+  }
+ }
+}

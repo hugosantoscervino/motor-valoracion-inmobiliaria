@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import xgboost as xgb
+import pydeck as pdk
 from PIL import Image
 
 BASE = Path(__file__).resolve().parent
@@ -13,7 +14,7 @@ ART = BASE / "artefactos"
 if not (ART / "madrid_meta.json").exists() and (ART / "artefactos").exists():
     ART = ART / "artefactos"
 
-st.set_page_config(page_title="VALORA · Motor de valoración residencial",
+st.set_page_config(page_title="Aldaba · Llama a cualquier puerta",
                    layout="wide", initial_sidebar_state="collapsed")
 
 # ── preferencias de accesibilidad (leídas antes de pintar los estilos) ──
@@ -51,8 +52,33 @@ def cargar(ciudad):
 
 
 @st.cache_data(show_spinner=False)
+def indice():
+    p = BASE / "indice.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+@st.cache_data(show_spinner=False)
 def resumen():
     return json.loads((ART / "resumen.json").read_text(encoding="utf-8"))
+
+
+IDX = indice()
+
+
+def aplicar_indice(meta, ciudad):
+    """Recalcula los factores por distrito desde indice.json, si existe."""
+    if not IDX or ciudad not in IDX.get("ciudades", {}):
+        return meta
+    niv = IDX["ciudades"][ciudad]
+    fc = niv["_ciudad"] / meta["unitprice_mediana_2018"]
+    for d, v in meta["distritos"].items():
+        n26 = niv.get(d)
+        v["e2026"] = float(n26) if n26 else None
+        v["factor"] = round(n26 / v["e2018"], 4) if n26 else round(fc, 4)
+        v["estimado"] = n26 is None
+    meta["nivel_ciudad_2026"] = niv["_ciudad"]
+    meta["factor_ciudad"] = round(fc, 4)
+    return meta
 
 
 def num(x, dec=0):
@@ -86,11 +112,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,
 .saltar:focus{{position:static;display:inline-block;background:{ACC};color:#fff;
  padding:8px 14px;margin:8px 0}}
 
-.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 32px;padding:26px 3rem;
- display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap}}
-.wm{{font-size:{1.25*FS}rem;font-weight:600;letter-spacing:.36em;text-transform:uppercase;
+.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 0;padding:30px 3rem 26px}}
+.marca{{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}}
+.tag{{font-size:{.9*FS}rem;color:{CREMA};font-style:italic}}
+.navlinea{{border-bottom:2px solid {LINE};margin:0 -3rem 30px}}
+.sep{{border-top:1px solid {LINE};margin:46px 0 34px}}
+.portada h1{{font-size:{2.5*FS}rem;font-weight:600;line-height:1.15;
+ letter-spacing:-.02em;margin:14px 0 16px;color:{INK}}}
+.portada h1 span{{color:{ACC}}}
+.portada p{{font-size:{1.06*FS}rem;line-height:1.6;color:{MUTE};max-width:62ch}}
+.wm{{font-size:{1.5*FS}rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;
  color:#FFFFFF}}
-.wm span{{color:{CREMA}}}
 .cab .sub{{font-family:'IBM Plex Mono',monospace;font-size:{.68*FS}rem;letter-spacing:.16em;
  text-transform:uppercase;color:{CREMA}}}
 
@@ -172,6 +204,12 @@ table.tb caption{{caption-side:top;text-align:left;font-size:{.9*FS}rem;color:{M
 [data-testid="stExpander"] summary p{{font-size:{.86*FS}rem!important;color:{INK}!important;
  font-weight:500}}
 
+div[data-testid="stHorizontalBlock"] div.stButton>button{{background:transparent;
+ border:none;color:{MUTE};font-size:{.94*FS}rem;font-weight:500;padding:14px 0;
+ border-radius:0;border-bottom:3px solid transparent;transition:none}}
+div[data-testid="stHorizontalBlock"] div.stButton>button:hover{{color:{ACC};
+ border-bottom-color:{ACC_DIM};background:transparent}}
+div.stButton>button[kind="secondary"]{{background:transparent}}
 .stTabs [data-baseweb="tab-list"]{{gap:30px;border-bottom:2px solid {LINE};background:transparent}}
 .stTabs [data-baseweb="tab"]{{background:transparent;padding:14px 0 12px;height:auto;
  font-size:{.94*FS}rem;font-weight:500;color:{MUTE}}}
@@ -192,11 +230,70 @@ table.tb caption{{caption-side:top;text-align:left;font-size:{.9*FS}rem;color:{M
 <a class="saltar" href="#valoracion">Saltar a la valoración</a>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="cab"><div class="wm">Valora<span>.</span></div>'
-            '<div class="sub">Cuánto vale una vivienda y por qué · '
-            'Madrid · Barcelona · València</div></div>', unsafe_allow_html=True)
+st.markdown('', unsafe_allow_html=True)
 
 # ─────────────────────────── datos del inmueble ───────────────────────
+PAGINAS = [("valorar", "Valorar"), ("comparar", "Comparar barrios"),
+           ("fiabilidad", "Fiabilidad"), ("metodo", "Cómo funciona")]
+if "pagina" not in st.session_state:
+    st.session_state.pagina = "inicio"
+
+st.markdown('<div class="cab"><div class="marca">'
+            '<span class="wm">Aldaba</span>'
+            '<span class="tag">Llama a cualquier puerta</span></div></div>',
+            unsafe_allow_html=True)
+
+nav = st.columns([1.2] + [1] * len(PAGINAS) + [3.2])
+if nav[0].button("Aldaba · Inicio", key="nav_home", use_container_width=True):
+    st.session_state.pagina = "inicio"
+for _i, (_clave, _etq) in enumerate(PAGINAS):
+    if nav[_i + 1].button(_etq, key=f"nav_{_clave}", use_container_width=True):
+        st.session_state.pagina = _clave
+PAG = st.session_state.pagina
+st.markdown('<div class="navlinea"></div>', unsafe_allow_html=True)
+
+if PAG == "inicio":
+    R0 = resumen()
+    _tot = sum(v["n_anuncios"] for v in R0.values())
+    st.markdown(
+        f'<div class="portada">'
+        f'<h1>Llama a cualquier puerta<br>'
+        f'<span>y te decimos lo que hay detrás.</span></h1>'
+        f'<p>Aldaba estima lo que vale una vivienda en Madrid, Barcelona y València, '
+        f'dice con cuánto margen lo hace y explica de dónde sale cada euro. '
+        f'Aprendido de {num(_tot)} viviendas reales.</p></div>'
+        f'<div class="kpi" style="margin-top:34px">'
+        f'<div><div class="v">3</div><div class="k">ciudades cubiertas</div></div>'
+        f'<div><div class="v">{num(_tot)}</div>'
+        f'<div class="k">viviendas analizadas</div></div>'
+        f'<div><div class="v">{max(v["r2_bloques"] for v in R0.values())*100:.0f} %</div>'
+        f'<div class="k">de acierto en el mejor mercado</div></div>'
+        f'<div><div class="v">{IDX["fecha_corta"] if IDX else "ago-2026"}</div>'
+        f'<div class="k">precios actualizados a</div></div></div>',
+        unsafe_allow_html=True)
+    _p = st.columns(3, gap="large")
+    for _col, (_t, _d) in zip(_p, [
+        ("Cuánto vale", "Metes los datos del piso y sale una cifra con su margen, más un "
+         "mapa de la ciudad con esa misma vivienda en cada barrio."),
+        ("¿Piden un precio justo?", "Escribes lo que pide el vendedor y te decimos si está "
+         "barata, normal o cara, y por cuánto."),
+        ("¿Y si fuera en otro barrio?", "La misma vivienda valorada en todas las zonas, "
+         "ordenadas de más cara a más barata.")]):
+        _col.markdown(f'<div class="tarj" style="height:100%"><div class="t" '
+                      f'style="font-size:1.15rem">{_t}</div>'
+                      f'<div class="d">{_d}</div></div>', unsafe_allow_html=True)
+    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    if st.button("Valorar una vivienda", key="cta", type="primary"):
+        st.session_state.pagina = "valorar"
+        st.rerun()
+    st.markdown(
+        f'<div class="pie"><div>Aldaba · Llama a cualquier puerta</div>'
+        f'<div>Datos idealista18 (2018) · Precios de '
+        f'{IDX["fecha"] if IDX else "agosto de 2026"}</div>'
+        f'<div>Estimación orientativa · No sustituye a una tasación oficial</div></div>',
+        unsafe_allow_html=True)
+    st.stop()
+
 st.markdown('<h2 class="sec">Datos de la vivienda</h2>'
             '<p class="sub">Rellena lo que sepas del inmueble. La valoración se '
             'actualiza al instante.</p>', unsafe_allow_html=True)
@@ -204,6 +301,7 @@ st.markdown('<h2 class="sec">Datos de la vivienda</h2>'
 c0, c1, c2, c3, c4 = st.columns([1.1, 1.5, 1, 1, 1])
 ciudad = c0.selectbox("Ciudad", CIUDADES)
 meta, mods, cen = cargar(ciudad)
+meta = aplicar_indice(meta, ciudad)
 dis_ok = [d for d, v in meta["distritos"].items() if v["n"] >= 120]
 nivel = {d: meta["distritos"][d]["e2026"] or meta["nivel_ciudad_2026"] for d in dis_ok}
 dis_ok = sorted(dis_ok, key=lambda d: -nivel[d])
@@ -227,9 +325,26 @@ FAC = meta["distritos"][distrito]["factor"]
 ESTIMADO = meta["distritos"][distrito]["estimado"]
 p99 = int(meta["dominio"]["area_p99"])
 sub_c = cen[cen.distrito == distrito]
-lat0 = float(sub_c.lat.mean()) if len(sub_c) else meta["centro"]["lat"]
-lon0 = float(sub_c.lon.mean()) if len(sub_c) else meta["centro"]["lon"]
+lat_d = float(sub_c.lat.mean()) if len(sub_c) else meta["centro"]["lat"]
+lon_d = float(sub_c.lon.mean()) if len(sub_c) else meta["centro"]["lon"]
 clat, clon = meta["centro"]["lat"], meta["centro"]["lon"]
+
+with st.expander("Ubicación exacta · afina la valoración con las coordenadas del portal"):
+    st.markdown('<div class="nota">Sin coordenadas usamos el centro del barrio, y dentro '
+                'de un mismo barrio el precio varía bastante. Si conoces la dirección, '
+                'sácalas de Google Maps: clic derecho sobre el portal y copia los dos '
+                'números.</div>', unsafe_allow_html=True)
+    q1, q2, q3 = st.columns([1, 1, 1.4])
+    exacta = q3.checkbox("Usar estas coordenadas", key="usar_coord")
+    lat_i = q1.number_input("Latitud", value=round(lat_d, 5), format="%.5f", step=0.0005,
+                            key=f"lat_{ciudad}_{distrito}")
+    lon_i = q2.number_input("Longitud", value=round(lon_d, 5), format="%.5f", step=0.0005,
+                            key=f"lon_{ciudad}_{distrito}")
+lat0, lon0 = (lat_i, lon_i) if exacta else (lat_d, lon_d)
+BARRIO = None
+if exacta and len(cen):
+    _d = (cen.lat - lat0) ** 2 + (cen.lon - lon0) ** 2
+    BARRIO = str(cen.iloc[int(_d.idxmin())]["barrio"])
 
 
 def fila(a, la, lo, dm=None):
@@ -262,8 +377,19 @@ u90 = max(float(predecir(f0, "q90")[0]), u50)
 p50, p10, p90 = u50 * area, u10 * area, u90 * area
 
 st.markdown('<div id="valoracion"></div>', unsafe_allow_html=True)
-tabV, tabO, tabZ, tabM, tabD = st.tabs(
-    ["Valoración", "¿Es buen precio?", "Comparar barrios", "Fiabilidad", "Cómo funciona"])
+
+
+class _Seccion:
+    def __init__(self, activa): self.activa = activa
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+
+
+tabV = _Seccion(PAG == "valorar")
+tabO = _Seccion(PAG == "valorar")
+tabZ = _Seccion(PAG == "comparar")
+tabM = _Seccion(PAG == "fiabilidad")
+tabD = _Seccion(PAG == "metodo")
 
 
 # ───────────────────────────── mapa ───────────────────────────────────
@@ -294,14 +420,17 @@ def campo(ciudad, area, rooms, baths, year, d_metro, ext):
 
 
 @st.cache_data(show_spinner=False)
-def png(zb, shape, lo, hi, stops):
+def png(zb, shape, lo, hi, stops, alfa=True):
+    """Superficie de precio en RGBA: transparente en lo barato, opaca en lo caro,
+    para que el callejero se lea por debajo."""
     Z = np.frombuffer(zb, dtype=np.float64).reshape(shape)
     t = np.clip((Z - lo) / max(hi - lo, 1e-9), 0, 1) ** .9
     ps = np.array([s[0] for s in stops])
-    rgb = np.zeros(t.shape + (3,), np.uint8)
+    rgba = np.zeros(t.shape + (4,), np.uint8)
     for k in range(3):
-        rgb[..., k] = np.clip(np.interp(t, ps, [s[1][k] for s in stops]), 0, 255)
-    im = Image.fromarray(rgb, "RGB").resize((shape[1] * 7, shape[0] * 7), Image.BICUBIC)
+        rgba[..., k] = np.clip(np.interp(t, ps, [s[1][k] for s in stops]), 0, 255)
+    rgba[..., 3] = (np.clip(0.30 + 0.48 * t, 0, 1) * 255).astype(np.uint8) if alfa else 255
+    im = Image.fromarray(rgba, "RGBA").resize((shape[1] * 8, shape[0] * 8), Image.BICUBIC)
     b = BytesIO(); im.save(b, "PNG", optimize=True)
     return base64.b64encode(b.getvalue()).decode()
 
@@ -362,7 +491,7 @@ def por_distrito(ciudad, area, rooms, baths, year, d_metro, ext):
 
 
 # ───────────────────────── pestaña · valoración ───────────────────────
-with tabV:
+if tabV.activa:
     st.markdown('<h2 class="sec">Lo que vale esta vivienda hoy</h2>'
                 '<p class="sub">Estimación a precios de agosto de 2026. La franja indica '
                 'el margen razonable: de cada diez viviendas parecidas, ocho se venden '
@@ -371,32 +500,9 @@ with tabV:
     Z, dlo = campo(ciudad, area, rooms, baths, year, d_metro, ext)
     lo_z, hi_z = float(np.percentile(Z, 2)), float(np.percentile(Z, 98))
     b64 = png(np.ascontiguousarray(Z).tobytes(), Z.shape, lo_z, hi_z, STOPS)
-    W, H = MAPA_W, MAPA_H
-    niv = list(np.linspace(lo_z, hi_z, 9))[1:-1]
-    paths = isolineas(Z, niv, W, H)
-    prox = int(np.argmin([abs(n - p50) for n in niv]))
-    px = (lon0 - (clon - dlo)) / (2 * dlo) * W
-    py = ((clat + DLA) - lat0) / (2 * DLA) * H
-    bar = 5 / (2 * dlo * KM * math.cos(math.radians(clat))) * W
-    iso = "".join(f'<path class="iso{" hi" if i == prox else ""}" d="{p}"/>'
-                  for i, p in enumerate(paths) if p)
 
+    rank_mapa = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
     # rótulos de los barrios principales sobre el mapa
-    rot, usados = "", []
-    for d, _, _ in por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)[:11]:
-        s = cen[cen.distrito == d]
-        if not len(s):
-            continue
-        x = (float(s.lon.mean()) - (clon - dlo)) / (2 * dlo) * W
-        y = ((clat + DLA) - float(s.lat.mean())) / (2 * DLA) * H
-        if not (30 < x < W - 30 and 26 < y < H - 34):
-            continue
-        if any(abs(x - a) < 96 and abs(y - b) < 24 for a, b in usados):
-            continue
-        usados.append((x, y))
-        rot += (f'<text class="dis" x="{x:.0f}" y="{y:.0f}" text-anchor="middle">'
-                f'{d}</text>')
-
     a1, a2 = st.columns([1, 1.3], gap="large")
     with a1:
         st.markdown(
@@ -420,40 +526,45 @@ with tabV:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        st.markdown(f"""
-<figure style="margin:0">
-<div class="mapa" style="background-image:url(data:image/png;base64,{b64})"
-     role="img" aria-label="Mapa de {ciudad}. Cuanto más oscuro, más cara la zona.
-     Esta misma vivienda costaría entre {eur(lo_z)} en las zonas más baratas y
-     {eur(hi_z)} en las más caras. El círculo marca {distrito}.">
- <svg class="ov" viewBox="0 0 {W} {H}" preserveAspectRatio="none" aria-hidden="true">{iso}</svg>
- <svg class="ov" viewBox="0 0 {W} {H}" aria-hidden="true">
-  {rot}
-  <g transform="translate(18,{H-18})">
-   <line x1="0" y1="0" x2="{bar:.0f}" y2="0" stroke="{INK}" stroke-width="1.6"/>
-   <line x1="0" y1="-4" x2="0" y2="4" stroke="{INK}" stroke-width="1.6"/>
-   <line x1="{bar:.0f}" y1="-4" x2="{bar:.0f}" y2="4" stroke="{INK}" stroke-width="1.6"/>
-   <text class="anot" x="{bar/2:.0f}" y="-8" text-anchor="middle">5 km</text></g>
-  <g transform="translate({W-22},20)">
-   <polygon points="0,-8 4,6 0,3 -4,6" fill="{INK}"/>
-   <text class="anot" x="0" y="19" text-anchor="middle">N</text></g>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="none" stroke="#FFFFFF" stroke-width="4"/>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="none" stroke="{INK}" stroke-width="2"/>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="3" fill="{INK}"/>
- </svg>
-</div>
-<figcaption class="nota" style="margin-top:12px"><b>Qué estás viendo:</b> el precio de
- <b>esta misma vivienda</b> si estuviera en cada punto de {ciudad}. El círculo marca dónde
- está. Cuanto más oscuro, más cara la zona.</figcaption>
-</figure>
-<div class="esc">
- <span>{eur(lo_z)}</span>
- <span class="bar" style="background:linear-gradient(90deg,
-  rgb{STOPS[0][1]},rgb{STOPS[1][1]} 30%,rgb{STOPS[-2][1]} 72%,rgb{STOPS[-1][1]})"></span>
- <span>{eur(hi_z)}</span>
- <span style="flex:1"></span><span>zona barata → zona cara</span>
-</div>
-""", unsafe_allow_html=True)
+        oeste, este = clon - dlo, clon + dlo
+        sur, norte = clat - DLA, clat + DLA
+        capas = [
+            pdk.Layer("BitmapLayer",
+                      image=f"data:image/png;base64,{b64}",
+                      bounds=[oeste, sur, este, norte], opacity=1.0),
+            pdk.Layer("TextLayer",
+                      data=[{"lon": float(cen[cen.distrito == d].lon.mean()),
+                             "lat": float(cen[cen.distrito == d].lat.mean()),
+                             "t": d}
+                            for d, _, _ in rank_mapa[:12]
+                            if len(cen[cen.distrito == d])],
+                      get_position="[lon, lat]", get_text="t",
+                      get_size=13, get_color=[26, 29, 27],
+                      get_alignment_baseline="'center'",
+                      outline_width=4, outline_color=[255, 255, 255],
+                      font_family="'Instrument Sans', sans-serif",
+                      character_set="auto", font_settings={"sdf": True}),
+            pdk.Layer("ScatterplotLayer",
+                      data=[{"lon": lon0, "lat": lat0}],
+                      get_position="[lon, lat]", get_radius=110,
+                      get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
+                      line_width_min_pixels=3, stroked=True, radius_min_pixels=7),
+        ]
+        st.pydeck_chart(pdk.Deck(
+            layers=capas,
+            initial_view_state=pdk.ViewState(latitude=lat0, longitude=lon0, zoom=11.1),
+            map_style="light", tooltip=False), height=470)
+        st.markdown(
+            f'<figcaption class="nota" style="margin-top:12px"><b>Qué estás viendo:</b> '
+            f'el precio de <b>esta misma vivienda</b> si estuviera en cada punto de '
+            f'{ciudad}, sobre el callejero real. El punto marca dónde está. Cuanto más '
+            f'intenso el verde, más cara la zona. Puedes arrastrar y hacer zoom.'
+            f'</figcaption>'
+            f'<div class="esc"><span>{eur(lo_z)}</span>'
+            f'<span class="bar" style="background:linear-gradient(90deg,'
+            f'rgba{STOPS[0][1]+(0.3,)},rgb{STOPS[-2][1]} 72%,rgb{STOPS[-1][1]})"></span>'
+            f'<span>{eur(hi_z)}</span><span style="flex:1"></span>'
+            f'<span>zona barata → zona cara</span></div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
 
@@ -486,7 +597,7 @@ with tabV:
                 f'<g font-family="IBM Plex Mono,monospace" font-size="11" fill="{MUTE}">'
                 f'<text x="{L}" y="{Hc-B+19}">{ex(xmin)}{unidad}</text>'
                 f'<text x="{R}" y="{Hc-B+19}" text-anchor="end">{ex(xmax)}{unidad}</text>'
-                f'<text x="{L}" y="{T-11}">{compact(max(ys))} €</text></g></svg>')
+                f'<text x="{R}" y="{T-11}" text-anchor="end">hasta {compact(max(ys))} €</text></g></svg>')
 
     g1, g2 = st.columns(2, gap="large")
     xa = np.linspace(max(25, area - 55), min(600, area + 55), 22)
@@ -513,8 +624,9 @@ with tabV:
                           f"un {cai:.0f} por ciento."), unsafe_allow_html=True)
 
 # ─────────────────────── pestaña · ¿es buen precio? ───────────────────
-with tabO:
-    st.markdown('<h2 class="sec">¿Están pidiendo un precio justo?</h2>'
+if tabO.activa:
+    st.markdown('<div class="sep"></div>'
+                '<h2 class="sec">¿Están pidiendo un precio justo?</h2>'
                 '<p class="sub">Escribe el precio del anuncio y lo comparamos con lo que '
                 'debería costar una vivienda como esta.</p>', unsafe_allow_html=True)
     o1, o2 = st.columns([1, 1.7], gap="large")
@@ -572,7 +684,7 @@ with tabO:
             unsafe_allow_html=True)
 
 # ───────────────────── pestaña · comparar barrios ─────────────────────
-with tabZ:
+if tabZ.activa:
     st.markdown('<h2 class="sec">La misma vivienda, barrio por barrio</h2>'
                 f'<p class="sub">Cuánto costaría este piso de {num(area)} m² en cada zona '
                 f'de {ciudad}, con las mismas características.</p>', unsafe_allow_html=True)
@@ -603,7 +715,7 @@ with tabZ:
            if any(e for _, _, e in rank) else ''), unsafe_allow_html=True)
 
 # ─────────────────────── pestaña · fiabilidad ─────────────────────────
-with tabM:
+if tabM.activa:
     R = resumen()
     st.markdown('<h2 class="sec">Hasta qué punto acierta</h2>'
                 '<p class="sub">Medido sobre viviendas que el modelo no había visto nunca, '
@@ -668,7 +780,7 @@ with tabM:
                     'de ciudad.</div>', unsafe_allow_html=True)
 
 # ─────────────────────── pestaña · cómo funciona ──────────────────────
-with tabD:
+if tabD.activa:
     st.markdown('<h2 class="sec">Cómo se calcula</h2>'
                 '<p class="sub">Sin tecnicismos.</p>', unsafe_allow_html=True)
     d1, d2 = st.columns(2, gap="large")
@@ -737,7 +849,7 @@ with st.expander("Accesibilidad"):
                 unsafe_allow_html=True)
 
 st.markdown(
-    f'<div class="pie"><div>Valora · Motor de valoración residencial</div>'
-    f'<div>Datos idealista18 (2018) · Precios de agosto de 2026</div>'
+    f'<div class="pie"><div>Aldaba · Llama a cualquier puerta</div>'
+    f'<div>Datos idealista18 (2018) · Precios de {IDX["fecha"]}</div>'
     f'<div>Estimación orientativa · No sustituye a una tasación oficial</div></div>',
     unsafe_allow_html=True)
