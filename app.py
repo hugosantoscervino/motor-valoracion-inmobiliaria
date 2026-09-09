@@ -134,6 +134,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,
 .tag{{font-size:{.9*FS}rem;color:{CREMA};font-style:italic}}
 .navlinea{{border-bottom:2px solid {LINE};margin:0 -3rem 30px}}
 .sep{{border-top:1px solid {LINE};margin:46px 0 34px}}
+.pulso{{background:{SOFT};border:1px solid {LINE};border-radius:4px;padding:18px 22px;margin-top:8px}}
+.pulso-t{{font-family:'IBM Plex Mono',monospace;font-size:{.64*FS}rem;letter-spacing:.16em;text-transform:uppercase;color:{MUTE};margin-bottom:14px}}
+.pulso-fila{{display:flex;gap:22px;flex-wrap:wrap}}
+.pulso-v{{font-family:'IBM Plex Mono',monospace;font-size:{1.18*FS}rem;font-weight:500;color:{INK}}}
+.pulso-k{{font-size:{.82*FS}rem;color:{MUTE};margin-top:3px;line-height:1.4}}
 .portada h1{{font-size:{2.5*FS}rem;font-weight:600;line-height:1.15;
  letter-spacing:-.02em;margin:14px 0 16px;color:{INK}}}
 .portada h1 span{{color:{ACC}}}
@@ -180,6 +185,7 @@ p.sub{{font-size:{.92*FS}rem;color:{MUTE};margin:0 0 18px;line-height:1.55}}
 
 .nota{{font-size:{.9*FS}rem;line-height:1.62;color:{MUTE}}}
 .nota b{{color:{INK};font-weight:600}}
+.chip{{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;letter-spacing:.10em;color:{ACC};border:1px solid {ACC_DIM};border-radius:20px;padding:4px 11px}}
 .aviso{{border-left:3px solid {ACC};background:{SOFT};padding:12px 15px;
  font-size:{.87*FS}rem;color:{INK};margin-top:16px;border-radius:0 4px 4px 0}}
 
@@ -305,6 +311,17 @@ if PAG == "inicio":
                       f'style="font-size:1.15rem;color:{INK}">{_t}</div>'
                       f'<div class="d" style="color:{MUTE}">{_d}</div></div>', unsafe_allow_html=True)
     st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="pulso">'
+        f'<div class="pulso-t">El mercado en cifras · {IDX["fecha"] if IDX else "agosto de 2026"}</div>'
+        f'<div class="pulso-fila">'
+        f'<div><div class="pulso-v">+86 %</div><div class="pulso-k">ha subido Madrid desde 2018</div></div>'
+        f'<div><div class="pulso-v">3.480 €/m²</div><div class="pulso-k">Vallecas hoy = mediana Madrid 2018</div></div>'
+        f'<div><div class="pulso-v">×2,02</div><div class="pulso-k">Salamanca se ha doblado</div></div>'
+        f'<div><div class="pulso-v">21 meses</div><div class="pulso-k">consecutivos de máximos históricos</div></div>'
+        f'</div></div>',
+        unsafe_allow_html=True)
+    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
     if st.button("Valorar una vivienda", key="cta", type="primary"):
         st.session_state.pagina = "valorar"
         st.rerun()
@@ -537,6 +554,11 @@ if tabV.activa:
             f'<div><div class="v">{num(area)} m²</div><div class="k">superficie</div></div>'
             f'<div><div class="v">{2018-year}</div><div class="k">años de antigüedad</div></div>'
             f'</div>'
+            f'<div class="chips" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px">'
+            f'<span class="chip">+{(FAC-1)*100:.0f}\u202f% desde 2018</span>'
+            f'<span class="chip">{eur(meta["distritos"][distrito].get("e2026") or meta["nivel_ciudad_2026"])}/m\u00b2 en {distrito}</span>'
+            f'<span class="chip">{num(meta["n_anuncios"])} viviendas analizadas</span>'
+            f'</div>'
             f'<div class="nota" style="margin-top:24px">En {distrito} el metro cuadrado se '
             f'ofrece hoy a <b>{eur(meta["distritos"][distrito]["e2026"] or meta["nivel_ciudad_2026"])}'
             f'</b> de media. Esta vivienda sale por encima o por debajo según sus '
@@ -548,19 +570,30 @@ if tabV.activa:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        # Imagen de la superficie de precios renderizada directamente por Streamlit
-        _zb = np.ascontiguousarray(Z).tobytes()
-        _b64 = png(_zb, Z.shape, lo_z, hi_z, STOPS, alfa=False)
-        _raw = base64.b64decode(_b64)
-        _im = Image.open(BytesIO(_raw)).convert("RGB")
-        st.image(_im, use_container_width=True, output_format="PNG")
+        # HeatmapLayer: datos del modelo como puntos ponderados sobre callejero real
+        _dlo = DLA * (MAPA_W / MAPA_H) / math.cos(math.radians(clat))
+        _las = np.linspace(clat + DLA, clat - DLA, Z.shape[0])
+        _los = np.linspace(clon - _dlo, clon + _dlo, Z.shape[1])
+        _LO, _LA = np.meshgrid(_los, _las)
+        _Znorm = np.clip((Z - lo_z) / max(hi_z - lo_z, 1e-9), 0, 1)
+        _pts = [{"lat": float(_LA[j, i]), "lon": float(_LO[j, i]),
+                 "w": float(_Znorm[j, i])}
+                for j in range(0, Z.shape[0], 1)
+                for i in range(0, Z.shape[1], 1)]
 
-        # Mapa interactivo solo para el pin y los rótulos de barrio
+        # Rótulos de barrios
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
         _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
                   "lat": float(cen[cen.distrito == d].lat.mean()), "t": d}
                  for d, _, _ in _rank_m[:12] if len(cen[cen.distrito == d])]
+
         _capas = [
+            pdk.Layer("HeatmapLayer", data=_pts,
+                      get_position="[lon, lat]", get_weight="w",
+                      aggregation="MEAN", radius_pixels=38, opacity=0.80,
+                      color_range=[[238,234,226,60],[198,214,202,140],
+                                   [137,180,158,190],[52,130,104,210],[11,77,61,230]],
+                      threshold=0.03),
             pdk.Layer("TextLayer", data=_labs,
                       get_position="[lon, lat]", get_text="t",
                       get_size=13, get_color=[26, 29, 27],
@@ -570,27 +603,27 @@ if tabV.activa:
                       outline_width=4, outline_color=[255, 255, 255]),
             pdk.Layer("ScatterplotLayer",
                       data=[{"lon": lon0, "lat": lat0}],
-                      get_position="[lon, lat]", get_radius=120,
+                      get_position="[lon, lat]", get_radius=130,
                       get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
-                      line_width_min_pixels=3, stroked=True, radius_min_pixels=8),
+                      line_width_min_pixels=3, stroked=True, radius_min_pixels=9),
         ]
         st.pydeck_chart(pdk.Deck(
             layers=_capas,
             initial_view_state=pdk.ViewState(
-                latitude=lat0, longitude=lon0, zoom=11.1),
-            map_style="light", tooltip=False), height=320)
+                latitude=lat0, longitude=lon0, zoom=11.5),
+            map_style="light", tooltip=False), height=520)
 
         st.markdown(
-            f'<figcaption class="nota" style="margin-top:8px"><b>Qué estás viendo:</b> '
-            f'el precio de <b>esta misma vivienda</b> si estuviera en cada punto de '
-            f'{ciudad}. Cuanto más oscuro el verde, más cara la zona. El mapa de abajo '
-            f'es interactivo: puedes arrastrar y hacer zoom.</figcaption>'
+            f'<figcaption class="nota" style="margin-top:8px">'
+            f'<b>Qué estás viendo:</b> cuánto costaría <b>este mismo piso</b> en cada '
+            f'punto de {ciudad}. Más oscuro = más caro. El mapa es interactivo.'
+            f'</figcaption>'
             f'<div class="esc"><span>{eur(lo_z)}</span>'
             f'<span class="bar" style="flex:0 0 150px;height:10px;border-radius:2px;'
             f'border:1px solid #CFC8B9;background:linear-gradient(90deg,'
             f'#EEE9E2,#8CB8A0 50%,#0B4D3D)"></span>'
             f'<span>{eur(hi_z)}</span><span style="flex:1"></span>'
-            f'<span>zona barata → zona cara</span></div>',
+            f'<span>barato → caro</span></div>',
             unsafe_allow_html=True)
 
     st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
@@ -737,8 +770,12 @@ if tabZ.activa:
         f'compara con el barrio elegido.</caption><tr><th>Barrio</th>'
         f'<th>Precio total</th><th>Por m²</th><th>Diferencia</th><th></th></tr>'
         f'{"".join(filas)}</table>'
-        + ('<div class="nota" style="margin-top:14px">* De estos barrios no se publica '
-           'precio propio; se usa la media de la ciudad.</div>'
+        + f'<div class="nota" style="margin-top:16px">'
+        + f'La diferencia entre el barrio más caro y el más barato de {ciudad} '
+        + f'es de <b>{eur(rank[0][1]-rank[-1][1])}</b> para esta vivienda concreta. '
+        + f'El barrio más caro multiplica por <b>{rank[0][1]/rank[-1][1]:.1f}×</b> '
+        + f'al más barato.</div>'
+        + ('<div class="nota" style="margin-top:8px">* Sin nivel publicado propio.</div>'
            if any(e for _, _, e in rank) else ''), unsafe_allow_html=True)
 
 # ─────────────────────── pestaña · fiabilidad ─────────────────────────
@@ -813,8 +850,7 @@ if tabM.activa:
 
 # ─────────────────────── pestaña · cómo funciona ──────────────────────
 if tabD.activa:
-    st.markdown('<h2 class="sec">Cómo se calcula</h2>'
-                '<p class="sub">Sin tecnicismos.</p>', unsafe_allow_html=True)
+    st.markdown('<h2 class="sec">Cómo se calcula</h2>', unsafe_allow_html=True)
     d1, d2 = st.columns(2, gap="large")
     bloques = [
         ("De dónde salen los datos",
