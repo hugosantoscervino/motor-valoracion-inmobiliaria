@@ -9,7 +9,7 @@ import xgboost as xgb
 from PIL import Image
 
 BASE = Path(__file__).resolve().parent
-ART = BASE / "artefactos"
+ART = BASE / "artefactos" / "artefactos"
 
 st.set_page_config(page_title="VALORA · Motor de valoración residencial",
                    layout="wide", initial_sidebar_state="collapsed")
