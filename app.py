@@ -58,22 +58,22 @@ st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 header[data-testid="stHeader"],#MainMenu,footer,[data-testid="stToolbar"],
-[data-testid="stDecoration"],[data-testid="stSidebarCollapsedControl"]{{display:none!important}}
+[data-testid="stDecoration"],[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"],[data-testid="stSidebarCollapseButton"],
+section[data-testid="stSidebar"]{{display:none!important}}
 .stApp{{background:{BG};overflow-x:hidden}}
-.block-container{{padding:0 max(1.2rem,calc(50vw - 840px)) 5rem!important;
- max-width:1680px!important}}
-.sangre{{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
- padding:26px max(1.2rem,calc(50vw - 840px))}}
+.block-container{{padding:0 3rem 5rem!important;max-width:1600px!important;
+ width:100%!important}}
 html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}}
 
-.banda{{background:{BANDA};color:#FFFFFF;margin-bottom:30px;
+.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 32px;padding:26px 3rem;
  display:flex;align-items:baseline;justify-content:space-between;
  gap:20px;flex-wrap:wrap}}
 .wm{{font-size:1.25rem;font-weight:600;letter-spacing:.36em;text-transform:uppercase;
  color:#FFFFFF}}
 .wm span{{color:{CREMA}}}
-.banda .sub{{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;
+.cab .sub{{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;
  text-transform:uppercase;color:{CREMA};opacity:.9}}
 
 .lbl{{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.2em;
@@ -83,7 +83,8 @@ html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
 
 .hero{{display:flex;gap:40px;align-items:center;flex-wrap:wrap}}
 .figura{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
- font-size:3.5rem;font-weight:500;letter-spacing:-.045em;color:{INK};line-height:1}}
+ font-size:3.5rem;font-weight:500;letter-spacing:-.045em;color:{INK};line-height:1;
+ white-space:nowrap}}
 .figura em{{font-style:normal;font-size:1.5rem;color:{ACC};margin-left:6px;font-weight:400}}
 .banda{{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:{MUTE};margin-top:10px}}
 .cifras{{display:flex;gap:28px;flex-wrap:wrap;margin-top:22px}}
@@ -162,7 +163,8 @@ table.tb td:first-child{{text-align:left}}
 }}
 @media(max-width:820px){{
  .block-container{{padding:0 1.1rem 3rem!important}}
- .sangre,.banda{{padding:20px 1.1rem}}
+ .cab{{margin:0 -1.1rem 24px;padding:20px 1.1rem}}
+ .figura{{white-space:normal}}
  .figura{{font-size:2.4rem}} .cifras{{gap:18px}}
  .stTabs [data-baseweb="tab-list"]{{gap:16px;overflow-x:auto;scrollbar-width:none}}
  table.tb{{font-size:.8rem}}
@@ -171,7 +173,7 @@ table.tb td:first-child{{text-align:left}}
 """, unsafe_allow_html=True)
 
 # ───────────────────────────── cabecera ───────────────────────────────
-st.markdown('<div class="banda sangre"><div class="wm">Valora<span>.</span></div>'
+st.markdown('<div class="cab"><div class="wm">Valora<span>.</span></div>'
             '<div class="sub">Motor de valoración residencial · '
             'Madrid · Barcelona · València</div></div>', unsafe_allow_html=True)
 
