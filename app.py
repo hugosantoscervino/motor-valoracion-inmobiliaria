@@ -16,14 +16,15 @@ if not (ART / "madrid_meta.json").exists() and (ART / "artefactos").exists():
 st.set_page_config(page_title="VALORA · Motor de valoración residencial",
                    layout="wide", initial_sidebar_state="collapsed")
 
-BG, SURF, LINE = "#FCFCFB", "#FFFFFF", "#E6E8E6"
-INK, MUTE, SOFT = "#14181A", "#6B7370", "#F3F6F4"
-ACC, ACC_DIM = "#0F6E56", "#8FB6A8"
+BG, SURF, LINE = "#F4F2ED", "#FBFAF7", "#D8D2C6"
+INK, MUTE, SOFT = "#1A1D1B", "#6E6C63", "#EAE9E1"
+ACC, ACC_DIM = "#0E5D4A", "#93B3A7"
+BANDA, CREMA = "#0E5D4A", "#E9E4D8"
 VERDE, ROJO, AMBAR = "#1A7F4B", "#B5482F", "#9A6B1E"
 CIUDADES = ["Madrid", "Barcelona", "Valencia"]
-STOPS = [(0.00, (233, 239, 236)), (0.25, (196, 220, 210)), (0.50, (140, 190, 170)),
-         (0.75, (60, 140, 112)), (1.00, (13, 86, 68))]
-MAPA_W, MAPA_H, DLA, NY = 660, 430, 0.075, 46
+STOPS = [(0.00, (238, 234, 226)), (0.25, (198, 214, 202)), (0.50, (137, 180, 158)),
+         (0.75, (52, 130, 104)), (1.00, (11, 77, 61))]
+MAPA_W, MAPA_H, DLA, NY = 700, 480, 0.075, 48
 NX = int(round(NY * MAPA_W / MAPA_H))
 KM = 111.0
 
@@ -58,17 +59,22 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 header[data-testid="stHeader"],#MainMenu,footer,[data-testid="stToolbar"],
 [data-testid="stDecoration"],[data-testid="stSidebarCollapsedControl"]{{display:none!important}}
-.stApp{{background:{BG}}}
-.block-container{{padding:2.4rem 3.2rem 5rem!important;max-width:1180px}}
+.stApp{{background:{BG};overflow-x:hidden}}
+.block-container{{padding:0 max(1.2rem,calc(50vw - 840px)) 5rem!important;
+ max-width:1680px!important}}
+.sangre{{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+ padding:26px max(1.2rem,calc(50vw - 840px))}}
 html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}}
 
-.mast{{display:flex;align-items:center;justify-content:space-between;
- padding-bottom:18px;border-bottom:1px solid {LINE};margin-bottom:6px}}
-.wm{{font-size:1.05rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase}}
-.wm span{{color:{ACC}}}
-.mast .sub{{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;
- text-transform:uppercase;color:{MUTE}}}
+.banda{{background:{BANDA};color:#FFFFFF;margin-bottom:30px;
+ display:flex;align-items:baseline;justify-content:space-between;
+ gap:20px;flex-wrap:wrap}}
+.wm{{font-size:1.25rem;font-weight:600;letter-spacing:.36em;text-transform:uppercase;
+ color:#FFFFFF}}
+.wm span{{color:{CREMA}}}
+.banda .sub{{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;
+ text-transform:uppercase;color:{CREMA};opacity:.9}}
 
 .lbl{{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.2em;
  text-transform:uppercase;color:{MUTE};margin-bottom:10px}}
@@ -85,7 +91,7 @@ html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
 .cifras .k{{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;
  text-transform:uppercase;color:{MUTE};margin-top:4px}}
 
-.mapa{{position:relative;border:1px solid {LINE};border-radius:3px;overflow:hidden;
+.mapa{{position:relative;border:1px solid {LINE};border-radius:4px;overflow:hidden;
  background:{SURF};background-size:100% 100%;background-repeat:no-repeat;
  aspect-ratio:{MAPA_W}/{MAPA_H};animation:fade .55s ease both}}
 @keyframes fade{{from{{opacity:0}}to{{opacity:1}}}}
@@ -99,14 +105,14 @@ html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.12em;
  text-transform:uppercase;color:{MUTE}}}
 .lgd .bar{{flex:0 0 150px;height:6px;border-radius:1px;background:linear-gradient(90deg,
- rgb(233,239,236),rgb(196,220,210) 25%,rgb(140,190,170) 50%,rgb(60,140,112) 75%,rgb(13,86,68))}}
+ rgb(238,234,226),rgb(198,214,202) 25%,rgb(137,180,158) 50%,rgb(52,130,104) 75%,rgb(11,77,61))}}
 
 .nota{{font-size:.88rem;line-height:1.62;color:{MUTE}}}
 .nota b{{color:{INK};font-weight:500}}
 .aviso{{border-left:2px solid {ACC};background:{SOFT};padding:12px 15px;
  font-size:.83rem;color:{INK};margin-top:16px;border-radius:0 3px 3px 0}}
 
-.tarj{{border:1px solid {LINE};border-radius:3px;background:{SURF};padding:22px 24px}}
+.tarj{{border:1px solid {LINE};border-radius:4px;background:{SURF};padding:24px 26px}}
 .tarj .t{{font-size:1.5rem;font-weight:600;letter-spacing:-.01em}}
 .tarj .d{{font-size:.87rem;color:{MUTE};margin-top:8px;line-height:1.6}}
 
@@ -149,47 +155,43 @@ table.tb td:first-child{{text-align:left}}
 .stTabs [data-baseweb="tab-panel"]{{padding-top:30px}}
 
 @media(prefers-reduced-motion:reduce){{.mapa{{animation:none}}}}
-@media(max-width:1000px){{
- .block-container{{padding:1.4rem 1.1rem 3rem!important}}
- .hero{{flex-direction:column;gap:24px;align-items:stretch}}
- .figura{{font-size:2.5rem}} .kpi{{flex-wrap:wrap}}
+@media(min-width:1500px){{ .figura{{font-size:4.2rem}} }}
+@media(max-width:1100px){{
+ .figura{{font-size:2.9rem}} .kpi{{flex-wrap:wrap}}
  .kpi>div{{flex:1 0 50%;border-bottom:1px solid {LINE}}}
- .stTabs [data-baseweb="tab-list"]{{gap:18px;overflow-x:auto}}
+}}
+@media(max-width:820px){{
+ .block-container{{padding:0 1.1rem 3rem!important}}
+ .sangre,.banda{{padding:20px 1.1rem}}
+ .figura{{font-size:2.4rem}} .cifras{{gap:18px}}
+ .stTabs [data-baseweb="tab-list"]{{gap:16px;overflow-x:auto;scrollbar-width:none}}
+ table.tb{{font-size:.8rem}}
 }}
 </style>
 """, unsafe_allow_html=True)
 
 # ───────────────────────────── cabecera ───────────────────────────────
-h1, h2 = st.columns([3, 1])
-with h1:
-    st.markdown('<div style="padding-top:6px"><div class="wm">Valora<span>.</span></div>'
-                '</div>', unsafe_allow_html=True)
-with h2:
-    ciudad = st.selectbox("Mercado", CIUDADES, label_visibility="collapsed")
+st.markdown('<div class="banda sangre"><div class="wm">Valora<span>.</span></div>'
+            '<div class="sub">Motor de valoración residencial · '
+            'Madrid · Barcelona · València</div></div>', unsafe_allow_html=True)
 
-meta, mods, cen = cargar(ciudad)
-st.markdown(f'<div class="mast" style="border-top:1px solid {LINE};padding-top:14px">'
-            f'<div class="sub">Motor de valoración residencial</div>'
-            f'<div class="sub">{ciudad} · nivel de agosto de 2026</div></div>',
-            unsafe_allow_html=True)
-
-# ───────────────────────────── controles ──────────────────────────────
 st.markdown('<div class="lbl">Activo</div>', unsafe_allow_html=True)
+c0, c1, c2, c3, c4 = st.columns([1.1, 1.5, 1, 1, 1])
+ciudad = c0.selectbox("Mercado", CIUDADES)
+meta, mods, cen = cargar(ciudad)
 dis_ok = [d for d, v in meta["distritos"].items() if v["n"] >= 120]
 nivel = {d: meta["distritos"][d]["e2026"] or meta["nivel_ciudad_2026"] for d in dis_ok}
 dis_ok = sorted(dis_ok, key=lambda d: -nivel[d])
-
-c1, c2, c3, c4 = st.columns([1.5, 1, 1, 1])
 distrito = c1.selectbox("Distrito", dis_ok)
 area = c2.number_input("Superficie (m²)", 25, 600, 90, 5)
 rooms = c3.number_input("Habitaciones", 0, 15, 3)
 baths = c4.number_input("Baños", 0, 10, 2)
 
-c5, c6 = st.columns([1, 2])
+c5, c6, c7 = st.columns([1, 2, 1.6])
 year = c5.number_input("Año de construcción", 1900, 2018, 1970)
 DOT = ["Ascensor", "Terraza", "Plaza de garaje", "Climatización", "Piscina", "Portería"]
 dots = c6.multiselect("Dotaciones", DOT, default=["Ascensor"])
-d_metro = st.slider("Distancia al metro (km)", 0.0, 5.0, 0.3, 0.05)
+d_metro = c7.slider("Distancia al metro (km)", 0.0, 5.0, 0.3, 0.05)
 
 lift, terrace, parking = int(DOT[0] in dots), int(DOT[1] in dots), int(DOT[2] in dots)
 air, pool, doorman = int(DOT[3] in dots), int(DOT[4] in dots), int(DOT[5] in dots)
