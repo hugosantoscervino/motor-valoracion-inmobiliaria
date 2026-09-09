@@ -570,34 +570,46 @@ if tabV.activa:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        # GridLayer: celdas exactas coloreadas por precio, sin difuminar, con tooltip
+        # ContourLayer: curvas suavizadas, sin cuadros, tooltip de precio al hover
         _dlo = DLA * (MAPA_W / MAPA_H) / math.cos(math.radians(clat))
         _las = np.linspace(clat + DLA, clat - DLA, Z.shape[0])
         _los = np.linspace(clon - _dlo, clon + _dlo, Z.shape[1])
         _LO, _LA = np.meshgrid(_los, _las)
-        _pts_grid = [
+        _pts_c = [
             {"lat": float(_LA[j, i]), "lon": float(_LO[j, i]),
-             "precio": int(round(Z[j, i] / 1000) * 1000)}
+             "precio": int(round(Z[j, i] / 5000) * 5000)}
             for j in range(Z.shape[0]) for i in range(Z.shape[1])
         ]
 
-        # Rótulos de barrios
+        # 8 bandas que cubren todo el rango real, la primera transparente
+        _n = 8
+        _ths = [int(lo_z + (hi_z - lo_z) * k / _n) for k in range(1, _n + 1)]
+        _cols = [
+            [238, 234, 226, 0],
+            [210, 225, 215, 155],
+            [180, 210, 195, 175],
+            [137, 180, 158, 195],
+            [88,  152, 124, 210],
+            [52,  130, 104, 222],
+            [28,  100, 78,  232],
+            [11,  77,  61,  242],
+        ]
+        _contours = [{"threshold": t, "color": c}
+                     for t, c in zip(_ths, _cols)]
+
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
         _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
                   "lat": float(cen[cen.distrito == d].lat.mean()), "t": d}
-                 for d, _, _ in _rank_m[:14] if len(cen[cen.distrito == d])]
+                 for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
 
         _capas = [
             pdk.Layer(
-                "GridLayer", data=_pts_grid,
+                "ContourLayer", data=_pts_c,
                 get_position="[lon, lat]",
                 get_weight="precio",
-                cell_size=480,
-                aggregation="MEAN",
-                color_range=[[238,234,226,160],[198,214,202,190],[137,180,158,210],
-                             [52,130,104,225],[11,77,61,240]],
-                elevation_scale=0, extruded=False,
-                pickable=True, coverage=0.97,
+                contours=_contours,
+                cell_size=420,
+                pickable=True,
             ),
             pdk.Layer("TextLayer", data=_labs,
                       get_position="[lon, lat]", get_text="t",
@@ -607,32 +619,31 @@ if tabV.activa:
                       get_alignment_baseline="'center'",
                       outline_width=4, outline_color=[255, 255, 255]),
             pdk.Layer("ScatterplotLayer",
-                      data=[{"lon": lon0, "lat": lat0, "precio": int(p50)}],
+                      data=[{"lon": lon0, "lat": lat0}],
                       get_position="[lon, lat]", get_radius=140,
                       get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
-                      line_width_min_pixels=3, stroked=True, radius_min_pixels=9,
-                      pickable=True),
+                      line_width_min_pixels=3, stroked=True, radius_min_pixels=9),
         ]
         _deck = pdk.Deck(
             layers=_capas,
             initial_view_state=pdk.ViewState(
                 latitude=lat0, longitude=lon0, zoom=11.6),
             map_style="light")
-        _deck.tooltip = {"text": "Precio estimado en esta zona\n{elevationValue} €"}
+        _deck.tooltip = {"text": "Precio estimado en esta zona\n{contourValue} €"}
         st.pydeck_chart(_deck, height=520)
 
         st.markdown(
             f'<figcaption class="nota" style="margin-top:8px">'
             f'<b>Qué estás viendo:</b> cuánto costaría <b>este mismo piso</b> en '
             f'cada punto de {ciudad}. Más oscuro = más caro. '
-            f'Pasa el cursor por el mapa para ver el precio exacto de cada zona.'
+            f'Pasa el cursor por el mapa para ver el precio estimado de cada zona.'
             f'</figcaption>'
             f'<div class="esc"><span>{eur(lo_z)}</span>'
             f'<span class="bar" style="flex:0 0 150px;height:10px;border-radius:2px;'
             f'border:1px solid #CFC8B9;background:linear-gradient(90deg,'
             f'#EEE9E2,#8CB8A0 50%,#0B4D3D)"></span>'
             f'<span>{eur(hi_z)}</span><span style="flex:1"></span>'
-            f'<span>barato → caro</span></div>',
+            f'<span>barato → caro · pasa el cursor</span></div>',
             unsafe_allow_html=True)
 
     st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
