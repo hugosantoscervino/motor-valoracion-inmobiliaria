@@ -570,51 +570,53 @@ if tabV.activa:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        # ContourLayer — cobertura completa de la Comunidad, cell_size grande → curvas suaves
-        _DLA_CM = 0.36   # ~40 km norte/sur
-        _DLO_CM = 0.43   # ~40 km este/oeste
-        _NY2, _NX2 = 34, 40
+        # ── Mapa: ISOBANDAS rellenas sobre callejero, con precio al pasar el cursor
+        # La extensión se ajusta a la de los datos reales: fuera de ahí el modelo
+        # extrapolaría sin fundamento.
+        _mla = (cen.lat.max() - cen.lat.min()) * 0.08
+        _mlo = (cen.lon.max() - cen.lon.min()) * 0.08
+        _laA, _laB = cen.lat.min() - _mla, cen.lat.max() + _mla
+        _loA, _loB = cen.lon.min() - _mlo, cen.lon.max() + _mlo
+        _mlat, _mlon = (_laA + _laB) / 2, (_loA + _loB) / 2
 
-        _las2 = np.linspace(clat + _DLA_CM, clat - _DLA_CM, _NY2)
-        _los2 = np.linspace(clon - _DLO_CM, clon + _DLO_CM, _NX2)
-        _LO2, _LA2 = np.meshgrid(_los2, _las2)
-
-        _base2 = dict(meta["medianas"])
-        _base2.update({"CONSTRUCTEDAREA": area, "ROOMNUMBER": rooms,
-                       "BATHNUMBER": baths, "CADCONSTRUCTIONYEAR": year,
-                       "CONSTRUCTIONYEAR": year, "DISTANCE_TO_METRO": d_metro,
-                       "HASLIFT": lift, "HASTERRACE": terrace,
-                       "HASPARKINGSPACE": parking, "HASAIRCONDITIONING": air,
-                       "HASSWIMMINGPOOL": pool, "HASDOORMAN": doorman,
-                       "PERIOD": 201812})
-        _df2 = pd.DataFrame([{c: _base2.get(c, 0.0) for c in FEAT}] * _LA2.size)
-        _df2["LATITUDE"]  = _LA2.ravel()
+        _NY2, _NX2 = 44, 42
+        _LA2, _LO2 = np.meshgrid(np.linspace(_laB, _laA, _NY2),
+                                 np.linspace(_loA, _loB, _NX2), indexing="ij")
+        _b2 = dict(meta["medianas"])
+        _b2.update({"CONSTRUCTEDAREA": area, "ROOMNUMBER": rooms, "BATHNUMBER": baths,
+                    "CADCONSTRUCTIONYEAR": year, "CONSTRUCTIONYEAR": year,
+                    "DISTANCE_TO_METRO": d_metro, "HASLIFT": lift,
+                    "HASTERRACE": terrace, "HASPARKINGSPACE": parking,
+                    "HASAIRCONDITIONING": air, "HASSWIMMINGPOOL": pool,
+                    "HASDOORMAN": doorman, "PERIOD": 201812})
+        _df2 = pd.DataFrame([{c: _b2.get(c, 0.0) for c in FEAT}] * _LA2.size)
+        _df2["LATITUDE"] = _LA2.ravel()
         _df2["LONGITUDE"] = _LO2.ravel()
-        _dist2 = np.sqrt((((_LA2 - clat) * KM) ** 2 +
-                          ((_LO2 - clon) * KM * math.cos(math.radians(clat))) ** 2)
-                         ).ravel()
-        _df2["DISTANCE_TO_CITY_CENTER"] = _dist2
-
+        _df2["DISTANCE_TO_CITY_CENTER"] = np.sqrt(
+            ((_LA2 - clat) * KM) ** 2 +
+            ((_LO2 - clon) * KM * math.cos(math.radians(clat))) ** 2).ravel()
         _fb2 = np.array([meta["distritos"].get(d, {}).get("factor", meta["factor_ciudad"])
                          for d in cen.distrito.values])
         _dd2 = ((_LA2.ravel()[:, None] - cen.lat.values[None, :]) ** 2 +
                 (_LO2.ravel()[:, None] - cen.lon.values[None, :]) ** 2)
-        _near2 = _dd2.argmin(1)
-        # Fuera de la capital (~18 km) aplicar factor reducido
-        _fac2 = np.where(_dist2 < 18, _fb2[_near2], meta["factor_ciudad"] * 0.65)
+        _Z2 = (np.exp(mods["q50"].predict(xgb.DMatrix(_df2[FEAT].astype(float))))
+               * _fb2[_dd2.argmin(1)] * area).reshape(_NY2, _NX2)
+        _lo2 = float(np.percentile(_Z2, 2))
+        _hi2 = float(np.percentile(_Z2, 98))
 
-        _Z2 = (np.exp(mods["q50"].predict(
-                   xgb.DMatrix(_df2[FEAT].astype(float)))) * _fac2 * area
-               ).reshape(_NY2, _NX2).astype(float)
+        # Isobandas: threshold como [min, max] rellena; como número solo traza líneas.
+        _N = 7
+        _bd = [_lo2 + (_hi2 - _lo2) * k / _N for k in range(_N + 1)]
+        _bd[0], _bd[-1] = 0.0, _hi2 * 3      # extremos abiertos: sin huecos sin color
+        _cols = [[214, 228, 219, 150], [178, 209, 192, 175], [142, 190, 166, 195],
+                 [104, 168, 140, 212], [68, 142, 113, 226], [36, 110, 86, 238],
+                 [11, 77, 61, 248]]
+        _contours = [{"threshold": [int(_bd[k]), int(_bd[k + 1])], "color": _cols[k]}
+                     for k in range(_N)]
 
-        _lo2 = float(np.percentile(_Z2, 3))
-        _hi2 = float(np.percentile(_Z2, 97))
-
-        _n = 7
-        _ths = [int(_lo2 + (_hi2 - _lo2) * k / _n) for k in range(1, _n + 1)]
-        _cols = [[238,234,226,0],[210,225,215,160],[170,205,185,185],
-                 [120,175,150,200],[70,140,110,215],[35,105,80,228],[11,77,61,242]]
-        _contours2 = [{"threshold": t, "color": c} for t, c in zip(_ths, _cols)]
+        _pts = [{"lat": float(_LA2[j, i]), "lon": float(_LO2[j, i]),
+                 "precio": int(_Z2[j, i])}
+                for j in range(_NY2) for i in range(_NX2)]
 
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
         _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
@@ -622,12 +624,15 @@ if tabV.activa:
                  for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
 
         _capas = [
-            pdk.Layer("ContourLayer", data=[
-                          {"lat": float(_LA2[j, i]), "lon": float(_LO2[j, i]),
-                           "precio": int(_Z2[j, i])}
-                          for j in range(_NY2) for i in range(_NX2)],
+            pdk.Layer("ContourLayer", data=_pts,
                       get_position="[lon, lat]", get_weight="precio",
-                      contours=_contours2, cell_size=2200, pickable=True),
+                      contours=_contours, cell_size=700,
+                      aggregation="MEAN", pickable=False),
+            # Capa invisible que aporta el precio exacto al pasar el cursor
+            pdk.Layer("ScatterplotLayer", data=_pts,
+                      get_position="[lon, lat]", get_radius=340,
+                      get_fill_color=[0, 0, 0, 1], pickable=True,
+                      radius_min_pixels=6),
             pdk.Layer("TextLayer", data=_labs,
                       get_position="[lon, lat]", get_text="t",
                       get_size=13, get_color=[26, 29, 27],
@@ -635,31 +640,30 @@ if tabV.activa:
                       character_set="auto", font_settings={"sdf": True},
                       get_alignment_baseline="'center'",
                       outline_width=4, outline_color=[255, 255, 255]),
-            pdk.Layer("ScatterplotLayer",
-                      data=[{"lon": lon0, "lat": lat0}],
-                      get_position="[lon, lat]", get_radius=160,
+            pdk.Layer("ScatterplotLayer", data=[{"lon": lon0, "lat": lat0}],
+                      get_position="[lon, lat]", get_radius=150,
                       get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
-                      line_width_min_pixels=3, stroked=True, radius_min_pixels=10),
+                      line_width_min_pixels=3, stroked=True, radius_min_pixels=9),
         ]
         _deck = pdk.Deck(layers=_capas,
                          initial_view_state=pdk.ViewState(
-                             latitude=lat0, longitude=lon0, zoom=9.6),
+                             latitude=_mlat, longitude=_mlon, zoom=11.0),
                          map_style="light")
-        _deck.tooltip = {"text": "Precio estimado en esta zona\n{contourValue} €"}
+        _deck.tooltip = {"text": "Precio estimado aquí\n{precio} €"}
         st.pydeck_chart(_deck, height=520)
 
         st.markdown(
             f'<figcaption class="nota" style="margin-top:8px">'
-            f'<b>Qué estás viendo:</b> cuánto costaría <b>este mismo piso</b> en '
-            f'cada punto de {ciudad} y su área metropolitana. '
-            f'Pasa el cursor para ver el precio estimado de cada zona.'
+            f'<b>Qué estás viendo:</b> cuánto costaría <b>este mismo piso</b> en cada '
+            f'punto de {ciudad}. <b>Pasa el cursor</b> para ver el precio de cada zona. '
+            f'El mapa cubre el término municipal, que es donde tenemos datos.'
             f'</figcaption>'
             f'<div class="esc"><span>{eur(_lo2)}</span>'
             f'<span class="bar" style="flex:0 0 150px;height:10px;border-radius:2px;'
             f'border:1px solid #CFC8B9;background:linear-gradient(90deg,'
-            f'#EEE9E2,#8CB8A0 50%,#0B4D3D)"></span>'
+            f'#D6E4DB,#8EBEA6 50%,#0B4D3D)"></span>'
             f'<span>{eur(_hi2)}</span><span style="flex:1"></span>'
-            f'<span>pasa el cursor → precio estimado</span></div>',
+            f'<span>barato → caro</span></div>',
             unsafe_allow_html=True)
 
     st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
