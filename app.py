@@ -618,21 +618,28 @@ if tabV.activa:
                  "precio": int(_Z2[j, i])}
                 for j in range(_NY2) for i in range(_NX2)]
 
+        # cell_size = separación real entre puntos de la retícula
+        _sep = int((_loB - _loA) * KM * math.cos(math.radians(clat)) / _NX2 * 1000)
+        _capa_contorno = pdk.Layer(
+            "ContourLayer", data=_pts,
+            get_position="[lon, lat]", get_weight="precio",
+            contours=_contours, cell_size=_sep, pickable=False)
+        # pydeck convierte los argumentos de texto en accesores (@@=MEAN),
+        # así que la agregación se asigna después de construir la capa.
+        _capa_contorno.aggregation = "MEAN"
+
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
         _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
                   "lat": float(cen[cen.distrito == d].lat.mean()), "t": d}
                  for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
 
         _capas = [
-            pdk.Layer("ContourLayer", data=_pts,
-                      get_position="[lon, lat]", get_weight="precio",
-                      contours=_contours, cell_size=700,
-                      aggregation="MEAN", pickable=False),
+            _capa_contorno,
             # Capa invisible que aporta el precio exacto al pasar el cursor
             pdk.Layer("ScatterplotLayer", data=_pts,
-                      get_position="[lon, lat]", get_radius=340,
+                      get_position="[lon, lat]", get_radius=int(_sep * 0.6),
                       get_fill_color=[0, 0, 0, 1], pickable=True,
-                      radius_min_pixels=6),
+                      radius_min_pixels=5),
             pdk.Layer("TextLayer", data=_labs,
                       get_position="[lon, lat]", get_text="t",
                       get_size=13, get_color=[26, 29, 27],
