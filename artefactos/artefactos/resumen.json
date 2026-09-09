@@ -1,0 +1,29 @@
+{
+ "Madrid": {
+  "n_anuncios": 94815,
+  "n_viviendas": 75804,
+  "r2_bloques": 0.9342,
+  "mae": 51079.0,
+  "cobertura_intervalo": 0.7813,
+  "factor_ciudad": 1.8595,
+  "nivel_ciudad_2026": 6471
+ },
+ "Barcelona": {
+  "n_anuncios": 61486,
+  "n_viviendas": 46729,
+  "r2_bloques": 0.9225,
+  "mae": 47522.0,
+  "cobertura_intervalo": 0.7703,
+  "factor_ciudad": 1.363,
+  "nivel_ciudad_2026": 5440
+ },
+ "Valencia": {
+  "n_anuncios": 33622,
+  "n_viviendas": 27391,
+  "r2_bloques": 0.8686,
+  "mae": 30644.0,
+  "cobertura_intervalo": 0.7548,
+  "factor_ciudad": 2.2655,
+  "nivel_ciudad_2026": 3469
+ }
+}
