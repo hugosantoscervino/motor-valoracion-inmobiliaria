@@ -16,14 +16,27 @@ if not (ART / "madrid_meta.json").exists() and (ART / "artefactos").exists():
 st.set_page_config(page_title="VALORA · Motor de valoración residencial",
                    layout="wide", initial_sidebar_state="collapsed")
 
-BG, SURF, LINE = "#F4F2ED", "#FBFAF7", "#D8D2C6"
-INK, MUTE, SOFT = "#1A1D1B", "#6E6C63", "#EAE9E1"
-ACC, ACC_DIM = "#0E5D4A", "#93B3A7"
-BANDA, CREMA = "#0E5D4A", "#E9E4D8"
-VERDE, ROJO, AMBAR = "#1A7F4B", "#B5482F", "#9A6B1E"
+# ── preferencias de accesibilidad (leídas antes de pintar los estilos) ──
+AC = st.session_state.get("alto_contraste", False)
+TG = st.session_state.get("texto_grande", False)
+
+if AC:
+    BG, SURF, LINE = "#FFFFFF", "#FFFFFF", "#000000"
+    INK, MUTE, SOFT = "#000000", "#1F1F1F", "#F0F0F0"
+    ACC, ACC_DIM, BANDA, CREMA = "#004030", "#004030", "#00281E", "#FFFFFF"
+    VERDE, ROJO, AMBAR = "#0B5C31", "#8C1D06", "#5C3B00"
+    STOPS = [(0.00, (255, 255, 255)), (0.30, (186, 214, 200)),
+             (0.65, (74, 140, 112)), (1.00, (0, 51, 38))]
+else:
+    BG, SURF, LINE = "#F4F2ED", "#FBFAF7", "#CFC8B9"
+    INK, MUTE, SOFT = "#1A1D1B", "#575549", "#EAE9E1"
+    ACC, ACC_DIM, BANDA, CREMA = "#0E5D4A", "#7FA697", "#0E5D4A", "#E9E4D8"
+    VERDE, ROJO, AMBAR = "#0F6B3C", "#A33A22", "#7A5310"
+    STOPS = [(0.00, (238, 234, 226)), (0.25, (198, 214, 202)), (0.50, (137, 180, 158)),
+             (0.75, (52, 130, 104)), (1.00, (11, 77, 61))]
+
+FS = 1.16 if TG else 1.0
 CIUDADES = ["Madrid", "Barcelona", "Valencia"]
-STOPS = [(0.00, (238, 234, 226)), (0.25, (198, 214, 202)), (0.50, (137, 180, 158)),
-         (0.75, (52, 130, 104)), (1.00, (11, 77, 61))]
 MAPA_W, MAPA_H, DLA, NY = 700, 480, 0.075, 48
 NX = int(round(NY * MAPA_W / MAPA_H))
 KM = 111.0
@@ -61,139 +74,149 @@ header[data-testid="stHeader"],#MainMenu,footer,[data-testid="stToolbar"],
 [data-testid="stDecoration"],[data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"],[data-testid="stSidebarCollapseButton"],
 section[data-testid="stSidebar"]{{display:none!important}}
-.stApp{{background:{BG};overflow-x:hidden}}
-.block-container{{padding:0 3rem 5rem!important;max-width:1600px!important;
- width:100%!important}}
-html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK}}}
+.stApp{{background:{BG}}}
+.block-container{{padding:0 3rem 5rem!important;max-width:1600px!important;width:100%!important}}
+html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK};
+ font-size:{FS}rem}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}}
 
+a:focus-visible,button:focus-visible,input:focus-visible,
+[role="tab"]:focus-visible,summary:focus-visible{{outline:3px solid {ACC};outline-offset:2px}}
+.saltar{{position:absolute;left:-9999px}}
+.saltar:focus{{position:static;display:inline-block;background:{ACC};color:#fff;
+ padding:8px 14px;margin:8px 0}}
+
 .cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 32px;padding:26px 3rem;
- display:flex;align-items:baseline;justify-content:space-between;
- gap:20px;flex-wrap:wrap}}
-.wm{{font-size:1.25rem;font-weight:600;letter-spacing:.36em;text-transform:uppercase;
+ display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap}}
+.wm{{font-size:{1.25*FS}rem;font-weight:600;letter-spacing:.36em;text-transform:uppercase;
  color:#FFFFFF}}
 .wm span{{color:{CREMA}}}
-.cab .sub{{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;
- text-transform:uppercase;color:{CREMA};opacity:.9}}
+.cab .sub{{font-family:'IBM Plex Mono',monospace;font-size:{.68*FS}rem;letter-spacing:.16em;
+ text-transform:uppercase;color:{CREMA}}}
 
-.lbl{{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.2em;
+.lbl{{font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;letter-spacing:.18em;
  text-transform:uppercase;color:{MUTE};margin-bottom:10px}}
-.eb{{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.2em;
- text-transform:uppercase;color:{MUTE};margin:0 0 16px}}
+h2.sec{{font-size:{1.18*FS}rem;font-weight:600;letter-spacing:-.01em;margin:0 0 6px;
+ color:{INK}}}
+p.sub{{font-size:{.92*FS}rem;color:{MUTE};margin:0 0 18px;line-height:1.55}}
 
-.hero{{display:flex;gap:40px;align-items:center;flex-wrap:wrap}}
 .figura{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
- font-size:3.5rem;font-weight:500;letter-spacing:-.045em;color:{INK};line-height:1;
+ font-size:{3.4*FS}rem;font-weight:500;letter-spacing:-.045em;color:{INK};line-height:1;
  white-space:nowrap}}
-.figura em{{font-style:normal;font-size:1.5rem;color:{ACC};margin-left:6px;font-weight:400}}
-.banda{{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:{MUTE};margin-top:10px}}
+.figura em{{font-style:normal;font-size:{1.5*FS}rem;color:{ACC};margin-left:6px;font-weight:400}}
+.banda{{font-family:'IBM Plex Mono',monospace;font-size:{.86*FS}rem;color:{INK};
+ margin-top:12px}}
+.banda span{{color:{MUTE}}}
 .cifras{{display:flex;gap:28px;flex-wrap:wrap;margin-top:22px}}
-.cifras .v{{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:{INK}}}
-.cifras .k{{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;
+.cifras .v{{font-family:'IBM Plex Mono',monospace;font-size:{1.08*FS}rem;color:{INK}}}
+.cifras .k{{font-family:'IBM Plex Mono',monospace;font-size:{.62*FS}rem;letter-spacing:.12em;
  text-transform:uppercase;color:{MUTE};margin-top:4px}}
 
 .mapa{{position:relative;border:1px solid {LINE};border-radius:4px;overflow:hidden;
  background:{SURF};background-size:100% 100%;background-repeat:no-repeat;
- aspect-ratio:{MAPA_W}/{MAPA_H};animation:fade .55s ease both}}
-@keyframes fade{{from{{opacity:0}}to{{opacity:1}}}}
+ aspect-ratio:{MAPA_W}/{MAPA_H}}}
 .mapa .ov{{position:absolute;inset:0;width:100%;height:100%}}
-.iso{{fill:none;stroke:#FFFFFF;stroke-width:.7;opacity:.5}}
-.iso.hi{{stroke:{INK};opacity:.75;stroke-width:1.2}}
-.anot{{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;
- fill:{INK};paint-order:stroke;stroke:#FFFFFF;stroke-width:2.6px;stroke-linejoin:round}}
+.iso{{fill:none;stroke:#FFFFFF;stroke-width:.8;opacity:.55}}
+.iso.hi{{stroke:{INK};opacity:.85;stroke-width:1.4}}
+.anot{{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
+ fill:{INK};paint-order:stroke;stroke:#FFFFFF;stroke-width:3px;stroke-linejoin:round}}
+.dis{{font-family:'Instrument Sans',sans-serif;font-size:12.5px;font-weight:500;
+ fill:{INK};paint-order:stroke;stroke:#FFFFFF;stroke-width:3.2px;stroke-linejoin:round}}
 
-.lgd{{display:flex;align-items:center;gap:10px;margin-top:10px;
- font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.12em;
- text-transform:uppercase;color:{MUTE}}}
-.lgd .bar{{flex:0 0 150px;height:6px;border-radius:1px;background:linear-gradient(90deg,
- rgb(238,234,226),rgb(198,214,202) 25%,rgb(137,180,158) 50%,rgb(52,130,104) 75%,rgb(11,77,61))}}
+.esc{{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;
+ font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;color:{MUTE}}}
+.esc .bar{{flex:0 0 170px;height:10px;border-radius:2px;border:1px solid {LINE}}}
 
-.nota{{font-size:.88rem;line-height:1.62;color:{MUTE}}}
-.nota b{{color:{INK};font-weight:500}}
-.aviso{{border-left:2px solid {ACC};background:{SOFT};padding:12px 15px;
- font-size:.83rem;color:{INK};margin-top:16px;border-radius:0 3px 3px 0}}
+.nota{{font-size:{.9*FS}rem;line-height:1.62;color:{MUTE}}}
+.nota b{{color:{INK};font-weight:600}}
+.aviso{{border-left:3px solid {ACC};background:{SOFT};padding:12px 15px;
+ font-size:{.87*FS}rem;color:{INK};margin-top:16px;border-radius:0 4px 4px 0}}
 
 .tarj{{border:1px solid {LINE};border-radius:4px;background:{SURF};padding:24px 26px}}
-.tarj .t{{font-size:1.5rem;font-weight:600;letter-spacing:-.01em}}
-.tarj .d{{font-size:.87rem;color:{MUTE};margin-top:8px;line-height:1.6}}
+.tarj .t{{font-size:{1.6*FS}rem;font-weight:600;display:flex;align-items:center;gap:10px}}
+.tarj .d{{font-size:{.92*FS}rem;color:{MUTE};margin-top:10px;line-height:1.6}}
+.sim{{font-size:{1.1*FS}rem;line-height:1}}
 
-.kpi{{display:flex;border-top:1px solid {INK};border-bottom:1px solid {LINE}}}
-.kpi>div{{flex:1;padding:16px 0 14px;border-right:1px solid {LINE}}}
+.kpi{{display:flex;border-top:2px solid {INK};border-bottom:1px solid {LINE};flex-wrap:wrap}}
+.kpi>div{{flex:1 1 160px;padding:16px 14px 14px;border-right:1px solid {LINE}}}
 .kpi>div:last-child{{border-right:none}}
-.kpi .v{{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;color:{INK}}}
-.kpi .k{{font-family:'IBM Plex Mono',monospace;font-size:.57rem;letter-spacing:.14em;
- text-transform:uppercase;color:{MUTE};margin-top:6px}}
+.kpi .v{{font-family:'IBM Plex Mono',monospace;font-size:{1.32*FS}rem;color:{INK}}}
+.kpi .k{{font-size:{.78*FS}rem;color:{MUTE};margin-top:6px;line-height:1.4}}
 
-table.tb{{width:100%;border-collapse:collapse;font-size:.88rem}}
-table.tb th{{font-family:'IBM Plex Mono',monospace;font-size:.57rem;letter-spacing:.14em;
- text-transform:uppercase;color:{MUTE};font-weight:400;text-align:right;padding-bottom:10px}}
+table.tb{{width:100%;border-collapse:collapse;font-size:{.92*FS}rem}}
+table.tb th{{font-size:{.76*FS}rem;color:{MUTE};font-weight:500;text-align:right;
+ padding-bottom:10px;border-bottom:1px solid {LINE}}}
 table.tb th:first-child{{text-align:left}}
-table.tb td{{padding:11px 0;border-bottom:1px solid {LINE};text-align:right}}
+table.tb td{{padding:12px 0;border-bottom:1px solid {LINE};text-align:right}}
 table.tb td:first-child{{text-align:left}}
+table.tb caption{{caption-side:top;text-align:left;font-size:{.9*FS}rem;color:{MUTE};
+ padding-bottom:12px}}
 
 .pie{{border-top:1px solid {LINE};margin-top:46px;padding-top:18px;display:flex;
- justify-content:space-between;gap:16px;flex-wrap:wrap;
- font-family:'IBM Plex Mono',monospace;font-size:.57rem;letter-spacing:.14em;
- text-transform:uppercase;color:{MUTE}}}
+ justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:{.78*FS}rem;color:{MUTE}}}
 
 [data-testid="stWidgetLabel"] p{{font-family:'Instrument Sans',sans-serif!important;
- font-size:.76rem!important;color:{MUTE}!important;font-weight:400!important}}
+ font-size:{.84*FS}rem!important;color:{INK}!important;font-weight:500!important}}
 [data-baseweb="select"]>div{{background:{SURF}!important;border-color:{LINE}!important;
- border-radius:3px!important}}
-[data-testid="stNumberInput"] input{{background:{SURF}!important;border-color:{LINE}!important;
- border-radius:3px!important}}
-[data-testid="stExpander"]{{border:1px solid {LINE};background:{SURF};border-radius:3px}}
-[data-testid="stExpander"] summary p{{font-family:'IBM Plex Mono',monospace!important;
- font-size:.6rem!important;letter-spacing:.16em;text-transform:uppercase;color:{MUTE}!important}}
+ border-radius:4px!important;color:{INK}!important}}
+[data-baseweb="select"] *{{color:{INK}!important}}
+[data-baseweb="select"] svg{{fill:{INK}!important}}
+[data-testid="stNumberInput"] input,[data-testid="stTextInput"] input{{
+ background:{SURF}!important;border-color:{LINE}!important;border-radius:4px!important;
+ color:{INK}!important;-webkit-text-fill-color:{INK}!important}}
+[data-testid="stNumberInput"] button{{background:{SURF}!important;color:{INK}!important}}
+[data-testid="stNumberInput"] button svg{{fill:{INK}!important}}
+[data-baseweb="tag"]{{background:{ACC}!important;color:#FFFFFF!important}}
+[data-baseweb="tag"] *{{color:#FFFFFF!important}}
+[data-testid="stExpander"]{{border:1px solid {LINE};background:{SURF};border-radius:4px}}
+[data-testid="stExpander"] summary p{{font-size:{.86*FS}rem!important;color:{INK}!important;
+ font-weight:500}}
 
-.stTabs [data-baseweb="tab-list"]{{gap:34px;border-bottom:1px solid {LINE};
- background:transparent}}
+.stTabs [data-baseweb="tab-list"]{{gap:30px;border-bottom:2px solid {LINE};background:transparent}}
 .stTabs [data-baseweb="tab"]{{background:transparent;padding:14px 0 12px;height:auto;
- font-family:'IBM Plex Mono',monospace;font-size:.63rem;letter-spacing:.18em;
- text-transform:uppercase;color:{MUTE}}}
-.stTabs [aria-selected="true"]{{color:{INK}!important}}
-.stTabs [data-baseweb="tab-highlight"]{{background:{ACC}}}
+ font-size:{.94*FS}rem;font-weight:500;color:{MUTE}}}
+.stTabs [aria-selected="true"]{{color:{ACC}!important}}
+.stTabs [data-baseweb="tab-highlight"]{{background:{ACC};height:3px}}
 .stTabs [data-baseweb="tab-panel"]{{padding-top:30px}}
 
-@media(prefers-reduced-motion:reduce){{.mapa{{animation:none}}}}
-@media(min-width:1500px){{ .figura{{font-size:4.2rem}} }}
-@media(max-width:1100px){{
- .figura{{font-size:2.9rem}} .kpi{{flex-wrap:wrap}}
- .kpi>div{{flex:1 0 50%;border-bottom:1px solid {LINE}}}
-}}
+@media(prefers-reduced-motion:reduce){{*{{animation:none!important;transition:none!important}}}}
+@media(min-width:1500px){{.figura{{font-size:{4.1*FS}rem}}}}
+@media(max-width:1100px){{.figura{{font-size:{2.9*FS}rem}}}}
 @media(max-width:820px){{
  .block-container{{padding:0 1.1rem 3rem!important}}
  .cab{{margin:0 -1.1rem 24px;padding:20px 1.1rem}}
- .figura{{white-space:normal}}
- .figura{{font-size:2.4rem}} .cifras{{gap:18px}}
+ .figura{{font-size:{2.3*FS}rem;white-space:normal}} .cifras{{gap:18px}}
  .stTabs [data-baseweb="tab-list"]{{gap:16px;overflow-x:auto;scrollbar-width:none}}
- table.tb{{font-size:.8rem}}
 }}
 </style>
+<a class="saltar" href="#valoracion">Saltar a la valoración</a>
 """, unsafe_allow_html=True)
 
-# ───────────────────────────── cabecera ───────────────────────────────
 st.markdown('<div class="cab"><div class="wm">Valora<span>.</span></div>'
-            '<div class="sub">Motor de valoración residencial · '
+            '<div class="sub">Cuánto vale una vivienda y por qué · '
             'Madrid · Barcelona · València</div></div>', unsafe_allow_html=True)
 
-st.markdown('<div class="lbl">Activo</div>', unsafe_allow_html=True)
+# ─────────────────────────── datos del inmueble ───────────────────────
+st.markdown('<h2 class="sec">Datos de la vivienda</h2>'
+            '<p class="sub">Rellena lo que sepas del inmueble. La valoración se '
+            'actualiza al instante.</p>', unsafe_allow_html=True)
+
 c0, c1, c2, c3, c4 = st.columns([1.1, 1.5, 1, 1, 1])
-ciudad = c0.selectbox("Mercado", CIUDADES)
+ciudad = c0.selectbox("Ciudad", CIUDADES)
 meta, mods, cen = cargar(ciudad)
 dis_ok = [d for d, v in meta["distritos"].items() if v["n"] >= 120]
 nivel = {d: meta["distritos"][d]["e2026"] or meta["nivel_ciudad_2026"] for d in dis_ok}
 dis_ok = sorted(dis_ok, key=lambda d: -nivel[d])
-distrito = c1.selectbox("Distrito", dis_ok)
-area = c2.number_input("Superficie (m²)", 25, 600, 90, 5)
+distrito = c1.selectbox("Barrio o distrito", dis_ok)
+area = c2.number_input("Metros cuadrados", 25, 600, 90, 5)
 rooms = c3.number_input("Habitaciones", 0, 15, 3)
 baths = c4.number_input("Baños", 0, 10, 2)
 
 c5, c6, c7 = st.columns([1, 2, 1.6])
 year = c5.number_input("Año de construcción", 1900, 2018, 1970)
 DOT = ["Ascensor", "Terraza", "Plaza de garaje", "Climatización", "Piscina", "Portería"]
-dots = c6.multiselect("Dotaciones", DOT, default=["Ascensor"])
-d_metro = c7.slider("Distancia al metro (km)", 0.0, 5.0, 0.3, 0.05)
+dots = c6.multiselect("Qué tiene la vivienda", DOT, default=["Ascensor"])
+d_metro = c7.slider("Minutos andando al metro (km)", 0.0, 5.0, 0.3, 0.05)
 
 lift, terrace, parking = int(DOT[0] in dots), int(DOT[1] in dots), int(DOT[2] in dots)
 air, pool, doorman = int(DOT[3] in dots), int(DOT[4] in dots), int(DOT[5] in dots)
@@ -203,9 +226,9 @@ FEAT = meta["features"]
 FAC = meta["distritos"][distrito]["factor"]
 ESTIMADO = meta["distritos"][distrito]["estimado"]
 p99 = int(meta["dominio"]["area_p99"])
-sub = cen[cen.distrito == distrito]
-lat0 = float(sub.lat.mean()) if len(sub) else meta["centro"]["lat"]
-lon0 = float(sub.lon.mean()) if len(sub) else meta["centro"]["lon"]
+sub_c = cen[cen.distrito == distrito]
+lat0 = float(sub_c.lat.mean()) if len(sub_c) else meta["centro"]["lat"]
+lon0 = float(sub_c.lon.mean()) if len(sub_c) else meta["centro"]["lon"]
 clat, clon = meta["centro"]["lat"], meta["centro"]["lon"]
 
 
@@ -224,9 +247,12 @@ def fila(a, la, lo, dm=None):
     return {c: r.get(c, 0.0) for c in FEAT}
 
 
+def bruto(filas, q="q50"):
+    return np.exp(mods[q].predict(xgb.DMatrix(pd.DataFrame(filas)[FEAT].astype(float))))
+
+
 def predecir(filas, q="q50"):
-    return np.exp(mods[q].predict(
-        xgb.DMatrix(pd.DataFrame(filas)[FEAT].astype(float)))) * FAC
+    return bruto(filas, q) * FAC
 
 
 f0 = [fila(area, lat0, lon0)]
@@ -235,8 +261,9 @@ u10 = min(float(predecir(f0, "q10")[0]), u50)
 u90 = max(float(predecir(f0, "q90")[0]), u50)
 p50, p10, p90 = u50 * area, u10 * area, u90 * area
 
-tabV, tabO, tabM, tabD = st.tabs(
-    ["Valoración", "Oportunidad", "Mercado", "Metodología"])
+st.markdown('<div id="valoracion"></div>', unsafe_allow_html=True)
+tabV, tabO, tabZ, tabM, tabD = st.tabs(
+    ["Valoración", "¿Es buen precio?", "Comparar barrios", "Fiabilidad", "Cómo funciona"])
 
 
 # ───────────────────────────── mapa ───────────────────────────────────
@@ -267,13 +294,13 @@ def campo(ciudad, area, rooms, baths, year, d_metro, ext):
 
 
 @st.cache_data(show_spinner=False)
-def png(zb, shape, lo, hi):
+def png(zb, shape, lo, hi, stops):
     Z = np.frombuffer(zb, dtype=np.float64).reshape(shape)
     t = np.clip((Z - lo) / max(hi - lo, 1e-9), 0, 1) ** .9
-    ps = np.array([s[0] for s in STOPS])
+    ps = np.array([s[0] for s in stops])
     rgb = np.zeros(t.shape + (3,), np.uint8)
     for k in range(3):
-        rgb[..., k] = np.clip(np.interp(t, ps, [s[1][k] for s in STOPS]), 0, 255)
+        rgb[..., k] = np.clip(np.interp(t, ps, [s[1][k] for s in stops]), 0, 255)
     im = Image.fromarray(rgb, "RGB").resize((shape[1] * 7, shape[0] * 7), Image.BICUBIC)
     b = BytesIO(); im.save(b, "PNG", optimize=True)
     return base64.b64encode(b.getvalue()).decode()
@@ -304,75 +331,134 @@ def isolineas(Z, niveles, W, H):
     return out
 
 
+@st.cache_data(show_spinner=False)
+def por_distrito(ciudad, area, rooms, baths, year, d_metro, ext):
+    """El mismo inmueble valorado en cada barrio."""
+    mt, mo, ce = cargar(ciudad)
+    filas, nombres = [], []
+    for d, v in mt["distritos"].items():
+        if v["n"] < 120:
+            continue
+        s = ce[ce.distrito == d]
+        if not len(s):
+            continue
+        la, lo = float(s.lat.mean()), float(s.lon.mean())
+        r = dict(mt["medianas"])
+        r.update({"CONSTRUCTEDAREA": area, "ROOMNUMBER": rooms, "BATHNUMBER": baths,
+                  "CADCONSTRUCTIONYEAR": year, "CONSTRUCTIONYEAR": year,
+                  "LATITUDE": la, "LONGITUDE": lo, "DISTANCE_TO_METRO": d_metro,
+                  "DISTANCE_TO_CITY_CENTER": float(np.sqrt(
+                      ((la - mt["centro"]["lat"]) * KM) ** 2 +
+                      ((lo - mt["centro"]["lon"]) * KM *
+                       math.cos(math.radians(mt["centro"]["lat"]))) ** 2)),
+                  "HASLIFT": ext[0], "HASTERRACE": ext[1], "HASPARKINGSPACE": ext[2],
+                  "HASAIRCONDITIONING": ext[3], "HASSWIMMINGPOOL": ext[4],
+                  "HASDOORMAN": ext[5], "PERIOD": 201812})
+        filas.append({c: r.get(c, 0.0) for c in mt["features"]})
+        nombres.append((d, v["factor"], v["estimado"]))
+    u = np.exp(mo["q50"].predict(xgb.DMatrix(pd.DataFrame(filas)[mt["features"]].astype(float))))
+    out = [(n, float(uu) * f * area, est) for (n, f, est), uu in zip(nombres, u)]
+    return sorted(out, key=lambda x: -x[1])
+
+
 # ───────────────────────── pestaña · valoración ───────────────────────
 with tabV:
+    st.markdown('<h2 class="sec">Lo que vale esta vivienda hoy</h2>'
+                '<p class="sub">Estimación a precios de agosto de 2026. La franja indica '
+                'el margen razonable: de cada diez viviendas parecidas, ocho se venden '
+                'dentro de él.</p>', unsafe_allow_html=True)
+
     Z, dlo = campo(ciudad, area, rooms, baths, year, d_metro, ext)
     lo_z, hi_z = float(np.percentile(Z, 2)), float(np.percentile(Z, 98))
-    b64 = png(np.ascontiguousarray(Z).tobytes(), Z.shape, lo_z, hi_z)
+    b64 = png(np.ascontiguousarray(Z).tobytes(), Z.shape, lo_z, hi_z, STOPS)
     W, H = MAPA_W, MAPA_H
     niv = list(np.linspace(lo_z, hi_z, 9))[1:-1]
     paths = isolineas(Z, niv, W, H)
     prox = int(np.argmin([abs(n - p50) for n in niv]))
     px = (lon0 - (clon - dlo)) / (2 * dlo) * W
     py = ((clat + DLA) - lat0) / (2 * DLA) * H
-    cx, cy = W / 2, H / 2
     bar = 5 / (2 * dlo * KM * math.cos(math.radians(clat))) * W
     iso = "".join(f'<path class="iso{" hi" if i == prox else ""}" d="{p}"/>'
                   for i, p in enumerate(paths) if p)
 
-    a1, a2 = st.columns([1, 1.25], gap="large")
+    # rótulos de los barrios principales sobre el mapa
+    rot, usados = "", []
+    for d, _, _ in por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)[:11]:
+        s = cen[cen.distrito == d]
+        if not len(s):
+            continue
+        x = (float(s.lon.mean()) - (clon - dlo)) / (2 * dlo) * W
+        y = ((clat + DLA) - float(s.lat.mean())) / (2 * DLA) * H
+        if not (30 < x < W - 30 and 26 < y < H - 34):
+            continue
+        if any(abs(x - a) < 96 and abs(y - b) < 24 for a, b in usados):
+            continue
+        usados.append((x, y))
+        rot += (f'<text class="dis" x="{x:.0f}" y="{y:.0f}" text-anchor="middle">'
+                f'{d}</text>')
+
+    a1, a2 = st.columns([1, 1.3], gap="large")
     with a1:
         st.markdown(
-            f'<div class="lbl">Valoración · {distrito}</div>'
+            f'<div class="lbl">{distrito} · {ciudad}</div>'
             f'<div class="figura">{num(p50)}<em>€</em></div>'
-            f'<div class="banda">{eur(p10)} — {eur(p90)} · intervalo 80 %</div>'
+            f'<div class="banda">{eur(p10)} a {eur(p90)} '
+            f'<span>· margen razonable</span></div>'
             f'<div class="cifras">'
-            f'<div><div class="v">{eur(u50)}</div><div class="k">por m²</div></div>'
+            f'<div><div class="v">{eur(u50)}</div><div class="k">precio por m²</div></div>'
             f'<div><div class="v">{num(area)} m²</div><div class="k">superficie</div></div>'
-            f'<div><div class="v">{2018-year}</div><div class="k">años</div></div>'
-            f'<div><div class="v">×{FAC:.2f}</div><div class="k">reindexado</div></div>'
+            f'<div><div class="v">{2018-year}</div><div class="k">años de antigüedad</div></div>'
             f'</div>'
-            f'<div class="nota" style="margin-top:24px">Nivel publicado del distrito: '
-            f'<b>{eur(meta["distritos"][distrito]["e2026"] or meta["nivel_ciudad_2026"])}'
-            f'/m²</b>. La estructura procede de {num(meta["n_anuncios"])} anuncios reales; '
-            f'el nivel, del índice corriente.</div>'
-            + (f'<div class="aviso"><b>Fuera de dominio.</b> Por encima de {p99} m² las '
-               f'observaciones son escasas: la estimación es orientativa.</div>'
-               if area > p99 else '')
-            + ('<div class="aviso">Distrito sin nivel publicado propio; se aplica el factor '
-               'de ciudad.</div>' if ESTIMADO else ''),
+            f'<div class="nota" style="margin-top:24px">En {distrito} el metro cuadrado se '
+            f'ofrece hoy a <b>{eur(meta["distritos"][distrito]["e2026"] or meta["nivel_ciudad_2026"])}'
+            f'</b> de media. Esta vivienda sale por encima o por debajo según sus '
+            f'características concretas.</div>'
+            + (f'<div class="aviso"><b>Aviso.</b> Por encima de {p99} m² tenemos pocas '
+               f'viviendas parecidas con las que comparar, así que la cifra es orientativa.'
+               f'</div>' if area > p99 else '')
+            + ('<div class="aviso"><b>Aviso.</b> De este barrio no se publica precio propio, '
+               'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
         st.markdown(f"""
-<div class="mapa" style="background-image:url(data:image/png;base64,{b64})">
- <svg class="ov" viewBox="0 0 {W} {H}" preserveAspectRatio="none">{iso}</svg>
- <svg class="ov" viewBox="0 0 {W} {H}">
-  <line x1="{cx-7}" y1="{cy}" x2="{cx+7}" y2="{cy}" stroke="{INK}" stroke-width="1.3"/>
-  <line x1="{cx}" y1="{cy-7}" x2="{cx}" y2="{cy+7}" stroke="{INK}" stroke-width="1.3"/>
-  <text class="anot" x="{cx}" y="{cy+20}" text-anchor="middle">CENTRO</text>
+<figure style="margin:0">
+<div class="mapa" style="background-image:url(data:image/png;base64,{b64})"
+     role="img" aria-label="Mapa de {ciudad}. Cuanto más oscuro, más cara la zona.
+     Esta misma vivienda costaría entre {eur(lo_z)} en las zonas más baratas y
+     {eur(hi_z)} en las más caras. El círculo marca {distrito}.">
+ <svg class="ov" viewBox="0 0 {W} {H}" preserveAspectRatio="none" aria-hidden="true">{iso}</svg>
+ <svg class="ov" viewBox="0 0 {W} {H}" aria-hidden="true">
+  {rot}
   <g transform="translate(18,{H-18})">
-   <line x1="0" y1="0" x2="{bar:.0f}" y2="0" stroke="{INK}" stroke-width="1.4"/>
-   <line x1="0" y1="-4" x2="0" y2="4" stroke="{INK}" stroke-width="1.4"/>
-   <line x1="{bar:.0f}" y1="-4" x2="{bar:.0f}" y2="4" stroke="{INK}" stroke-width="1.4"/>
+   <line x1="0" y1="0" x2="{bar:.0f}" y2="0" stroke="{INK}" stroke-width="1.6"/>
+   <line x1="0" y1="-4" x2="0" y2="4" stroke="{INK}" stroke-width="1.6"/>
+   <line x1="{bar:.0f}" y1="-4" x2="{bar:.0f}" y2="4" stroke="{INK}" stroke-width="1.6"/>
    <text class="anot" x="{bar/2:.0f}" y="-8" text-anchor="middle">5 km</text></g>
   <g transform="translate({W-22},20)">
    <polygon points="0,-8 4,6 0,3 -4,6" fill="{INK}"/>
    <text class="anot" x="0" y="19" text-anchor="middle">N</text></g>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="6" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="6" fill="none" stroke="{INK}" stroke-width="1.3"/>
-  <circle cx="{px:.1f}" cy="{py:.1f}" r="2.2" fill="{INK}"/>
+  <circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="none" stroke="{INK}" stroke-width="2"/>
+  <circle cx="{px:.1f}" cy="{py:.1f}" r="3" fill="{INK}"/>
  </svg>
 </div>
-<div class="lgd"><span class="bar"></span><span>{compact(lo_z)} €</span>
- <span style="flex:1"></span><span>{compact(hi_z)} €</span>
- <span style="opacity:.75">· el mismo activo en cada punto</span></div>
+<figcaption class="nota" style="margin-top:12px"><b>Qué estás viendo:</b> el precio de
+ <b>esta misma vivienda</b> si estuviera en cada punto de {ciudad}. El círculo marca dónde
+ está. Cuanto más oscuro, más cara la zona.</figcaption>
+</figure>
+<div class="esc">
+ <span>{eur(lo_z)}</span>
+ <span class="bar" style="background:linear-gradient(90deg,
+  rgb{STOPS[0][1]},rgb{STOPS[1][1]} 30%,rgb{STOPS[-2][1]} 72%,rgb{STOPS[-1][1]})"></span>
+ <span>{eur(hi_z)}</span>
+ <span style="flex:1"></span><span>zona barata → zona cara</span>
+</div>
 """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height:34px'></div>", unsafe_allow_html=True)
-    g1, g2 = st.columns(2, gap="large")
+    st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
 
-    def curva(xs, ys, xn, yn, unidad, ident):
-        Wc, Hc, L, R, T, B = 520, 180, 12, 508, 24, 42
+    def curva(xs, ys, xn, yn, unidad, etiqueta):
+        Wc, Hc, L, R, T, B = 520, 190, 12, 508, 26, 46
         xmin, xmax = float(min(xs)), float(max(xs))
         ymin, ymax = float(min(ys)), float(max(ys))
         pad = (ymax - ymin) * .18 or 1
@@ -382,185 +468,276 @@ with tabV:
         pts = " ".join(f"{fx(x):.1f},{fy(y):.1f}" for x, y in zip(xs, ys))
         ex = lambda v: num(v, 1).rstrip("0").rstrip(",") if unidad == " km" else num(v)
         g = "".join(f'<line x1="{L}" y1="{T+(Hc-B-T)*i/3:.1f}" x2="{R}" '
-                    f'y2="{T+(Hc-B-T)*i/3:.1f}" stroke="{LINE}"/>' for i in range(1, 3))
-        return (f'<svg viewBox="0 0 {Wc} {Hc}" width="100%" style="display:block;'
-                f'overflow:visible">{g}'
-                f'<polygon points="{L},{Hc-B} {pts} {R},{Hc-B}" fill="{ACC}" opacity=".07"/>'
-                f'<polyline points="{pts}" fill="none" stroke="{ACC}" stroke-width="1.8" '
+                    f'y2="{T+(Hc-B-T)*i/3:.1f}" stroke="{LINE}" opacity=".55"/>'
+                    for i in range(1, 3))
+        return (f'<svg viewBox="0 0 {Wc} {Hc}" width="100%" role="img" '
+                f'aria-label="{etiqueta}" style="display:block;overflow:visible">{g}'
+                f'<polygon points="{L},{Hc-B} {pts} {R},{Hc-B}" fill="{ACC}" opacity=".10"/>'
+                f'<polyline points="{pts}" fill="none" stroke="{ACC}" stroke-width="2.4" '
                 f'stroke-linejoin="round"/>'
                 f'<line x1="{fx(xn):.1f}" y1="{T-6}" x2="{fx(xn):.1f}" y2="{Hc-B}" '
-                f'stroke="{ACC_DIM}" stroke-dasharray="2 4"/>'
-                f'<circle cx="{fx(xn):.1f}" cy="{fy(yn):.1f}" r="4.2" fill="{ACC}" '
-                f'stroke="#FFFFFF" stroke-width="1.8"/>'
+                f'stroke="{INK}" stroke-dasharray="3 3" opacity=".5"/>'
+                f'<circle cx="{fx(xn):.1f}" cy="{fy(yn):.1f}" r="5.5" fill="{ACC}" '
+                f'stroke="#FFFFFF" stroke-width="2.2"/>'
+                f'<text x="{fx(xn):.1f}" y="{T-11}" fill="{INK}" font-size="11.5" '
+                f'text-anchor="middle" font-family="IBM Plex Mono,monospace">'
+                f'esta vivienda</text>'
                 f'<line x1="{L}" y1="{Hc-B}" x2="{R}" y2="{Hc-B}" stroke="{LINE}"/>'
-                f'<g font-family="IBM Plex Mono,monospace" font-size="10.5" fill="{MUTE}">'
-                f'<text x="{L}" y="{Hc-B+17}">{ex(xmin)}{unidad}</text>'
-                f'<text x="{R}" y="{Hc-B+17}" text-anchor="end">{ex(xmax)}{unidad}</text>'
-                f'<text x="{L}" y="{T-10}">{compact(max(ys))} €</text></g></svg>')
+                f'<g font-family="IBM Plex Mono,monospace" font-size="11" fill="{MUTE}">'
+                f'<text x="{L}" y="{Hc-B+19}">{ex(xmin)}{unidad}</text>'
+                f'<text x="{R}" y="{Hc-B+19}" text-anchor="end">{ex(xmax)}{unidad}</text>'
+                f'<text x="{L}" y="{T-11}">{compact(max(ys))} €</text></g></svg>')
 
+    g1, g2 = st.columns(2, gap="large")
     xa = np.linspace(max(25, area - 55), min(600, area + 55), 22)
     ya = predecir([fila(float(a), lat0, lon0) for a in xa]) * xa
     with g1:
-        st.markdown('<div class="eb">Elasticidad · superficie</div>', unsafe_allow_html=True)
-        st.markdown(curva(list(xa), list(ya), area, p50, " m²", "a"), unsafe_allow_html=True)
-        st.markdown(f'<div class="nota" style="margin-top:8px">Cada m² adicional en torno a '
-                    f'los {area} m² añade '
-                    f'<b>{eur((float(ya[-1])-float(ya[0]))/(xa[-1]-xa[0]))}</b>.</div>',
+        pend = (float(ya[-1]) - float(ya[0])) / (xa[-1] - xa[0])
+        st.markdown('<h2 class="sec">Si fuera más grande o más pequeña</h2>'
+                    f'<p class="sub">Manteniendo todo lo demás igual, cada metro cuadrado '
+                    f'de más suma unos <b>{eur(pend)}</b>.</p>', unsafe_allow_html=True)
+        st.markdown(curva(list(xa), list(ya), area, p50, " m²",
+                          f"Precio según superficie, de {num(xa[0])} a {num(xa[-1])} metros "
+                          f"cuadrados. Cada metro añade unos {eur(pend)}."),
                     unsafe_allow_html=True)
     xd = np.linspace(0.05, 3.0, 22)
     yd = predecir([fila(area, lat0, lon0, dm=float(v)) for v in xd]) * area
     with g2:
-        st.markdown('<div class="eb">Gradiente · acceso al metro</div>', unsafe_allow_html=True)
-        st.markdown(curva(list(xd), list(yd), min(d_metro, 3.0), p50, " km", "d"),
+        cai = (float(yd[0]) - float(yd[-1])) / float(yd[0]) * 100
+        st.markdown('<h2 class="sec">Si estuviera más lejos del metro</h2>'
+                    f'<p class="sub">Alejarse de 50 metros a 3 kilómetros de una boca de '
+                    f'metro le resta un <b>{cai:.1f} %</b> del valor.</p>',
                     unsafe_allow_html=True)
-        st.markdown(f'<div class="nota" style="margin-top:8px">Pasar de 50 m a 3 km de una '
-                    f'boca de metro resta un '
-                    f'<b>{(float(yd[0])-float(yd[-1]))/float(yd[0])*100:.1f} %</b>.</div>',
-                    unsafe_allow_html=True)
+        st.markdown(curva(list(xd), list(yd), min(d_metro, 3.0), p50, " km",
+                          f"Precio según distancia al metro. Alejarse a 3 kilómetros resta "
+                          f"un {cai:.0f} por ciento."), unsafe_allow_html=True)
 
-# ───────────────────────── pestaña · oportunidad ──────────────────────
+# ─────────────────────── pestaña · ¿es buen precio? ───────────────────
 with tabO:
+    st.markdown('<h2 class="sec">¿Están pidiendo un precio justo?</h2>'
+                '<p class="sub">Escribe el precio del anuncio y lo comparamos con lo que '
+                'debería costar una vivienda como esta.</p>', unsafe_allow_html=True)
     o1, o2 = st.columns([1, 1.7], gap="large")
     with o1:
-        st.markdown('<div class="lbl">Precio pedido</div>', unsafe_allow_html=True)
-        pedido = st.number_input("Precio del vendedor (€)", 0, 20_000_000,
-                                 int(round(p50 / 1000) * 1000), 5000,
-                                 label_visibility="collapsed")
-        st.markdown(f'<div class="nota" style="margin-top:12px">Se compara con el intervalo '
-                    f'del 80 % de la valoración: <b>{eur(p10)}</b> a <b>{eur(p90)}</b>.</div>',
-                    unsafe_allow_html=True)
+        pedido = st.number_input("Precio que piden (€)", 0, 20_000_000,
+                                 int(round(p50 / 1000) * 1000), 5000)
+        st.markdown(f'<div class="nota" style="margin-top:12px">Se compara con el margen '
+                    f'razonable de esta vivienda: de <b>{eur(p10)}</b> a '
+                    f'<b>{eur(p90)}</b>.</div>', unsafe_allow_html=True)
     with o2:
         if pedido <= 0:
-            ver, col, det = "Introduce un precio", MUTE, ""
+            ver, col, sim, det = "Escribe un precio", MUTE, "", ""
         elif pedido < p10:
-            ver, col = "Oportunidad", VERDE
-            det = (f"Se pide {eur(p10-pedido)} por debajo del extremo inferior. Solo un 10 % "
-                   f"de las viviendas comparables se ofrecen a este precio o menos.")
+            ver, col, sim = "Está barata", VERDE, "▼"
+            det = (f"Piden {eur(p10-pedido)} menos de lo que marca el margen inferior. "
+                   f"Solo una de cada diez viviendas parecidas se ofrece tan barata.")
         elif pedido > p90:
-            ver, col = "Sobrevalorado", ROJO
-            det = (f"Se pide {eur(pedido-p90)} por encima del extremo superior. Solo un 10 % "
-                   f"de las comparables alcanzan este precio.")
+            ver, col, sim = "Está cara", ROJO, "▲"
+            det = (f"Piden {eur(pedido-p90)} más de lo que marca el margen superior. "
+                   f"Solo una de cada diez viviendas parecidas llega a ese precio.")
         else:
-            ver, col = "Precio de mercado", AMBAR
-            det = (f"Dentro del intervalo, en el percentil "
-                   f"{(pedido-p10)/max(p90-p10,1)*100:.0f} de la banda. Diferencia frente a "
-                   f"la estimación central: {eur(pedido-p50)}.")
-        st.markdown(f'<div class="tarj"><div class="t" style="color:{col}">{ver}</div>'
+            ver, col, sim = "Precio normal", AMBAR, "●"
+            det = (f"Está dentro de lo esperable. La diferencia con nuestra estimación "
+                   f"es de {eur(abs(pedido-p50))} "
+                   f"{'por encima' if pedido > p50 else 'por debajo'}.")
+        st.markdown(f'<div class="tarj"><div class="t" style="color:{col}">'
+                    f'<span class="sim" aria-hidden="true">{sim}</span>{ver}</div>'
                     f'<div class="d">{det}</div></div>', unsafe_allow_html=True)
 
     if pedido > 0:
         amax = max(p90, pedido) * 1.1
-        sx_ = lambda v: 6 + v / amax * 988
+        sx_ = lambda v: 10 + v / amax * 980
         st.markdown(
-            f'<svg viewBox="0 0 1000 86" width="100%" preserveAspectRatio="none" '
+            f'<svg viewBox="0 0 1000 96" width="100%" preserveAspectRatio="none" role="img" '
+            f'aria-label="{ver}. Piden {eur(pedido)}. El margen razonable va de {eur(p10)} '
+            f'a {eur(p90)}, con estimación central de {eur(p50)}." '
             f'style="display:block;overflow:visible;margin-top:26px">'
-            f'<rect x="{sx_(p10):.1f}" y="32" width="{sx_(p90)-sx_(p10):.1f}" height="24" '
-            f'fill="{ACC}" opacity=".11"/>'
-            f'<line x1="{sx_(p10):.1f}" y1="32" x2="{sx_(p10):.1f}" y2="56" '
-            f'stroke="{ACC_DIM}" stroke-width="1.3"/>'
-            f'<line x1="{sx_(p90):.1f}" y1="32" x2="{sx_(p90):.1f}" y2="56" '
-            f'stroke="{ACC_DIM}" stroke-width="1.3"/>'
-            f'<line x1="6" y1="44" x2="994" y2="44" stroke="{LINE}"/>'
-            f'<line x1="{sx_(p50):.1f}" y1="26" x2="{sx_(p50):.1f}" y2="62" '
-            f'stroke="{ACC}" stroke-width="2"/>'
-            f'<text x="{sx_(p50):.1f}" y="18" fill="{ACC}" font-size="10.5" '
-            f'text-anchor="middle" font-family="IBM Plex Mono,monospace">estimación</text>'
-            f'<circle cx="{sx_(pedido):.1f}" cy="44" r="7" fill="{col}" stroke="#FFFFFF" '
-            f'stroke-width="2"/>'
-            f'<text x="{sx_(pedido):.1f}" y="79" fill="{col}" font-size="10.5" '
-            f'text-anchor="middle" font-family="IBM Plex Mono,monospace">'
-            f'pedido {compact(pedido)} €</text></svg>', unsafe_allow_html=True)
+            f'<rect x="{sx_(p10):.1f}" y="34" width="{sx_(p90)-sx_(p10):.1f}" height="26" '
+            f'fill="{ACC}" opacity=".16"/>'
+            f'<line x1="{sx_(p10):.1f}" y1="34" x2="{sx_(p10):.1f}" y2="60" '
+            f'stroke="{ACC}" stroke-width="1.8"/>'
+            f'<line x1="{sx_(p90):.1f}" y1="34" x2="{sx_(p90):.1f}" y2="60" '
+            f'stroke="{ACC}" stroke-width="1.8"/>'
+            f'<line x1="10" y1="47" x2="990" y2="47" stroke="{LINE}"/>'
+            f'<line x1="{sx_(p50):.1f}" y1="28" x2="{sx_(p50):.1f}" y2="66" '
+            f'stroke="{ACC}" stroke-width="2.6"/>'
+            f'<text x="{sx_(p50):.1f}" y="20" fill="{INK}" font-size="12" '
+            f'text-anchor="middle" font-family="Instrument Sans,sans-serif">'
+            f'lo que debería costar</text>'
+            f'<circle cx="{sx_(pedido):.1f}" cy="47" r="9" fill="{col}" stroke="#FFFFFF" '
+            f'stroke-width="2.5"/>'
+            f'<text x="{sx_(pedido):.1f}" y="88" fill="{col}" font-size="12.5" '
+            f'font-weight="600" text-anchor="middle" '
+            f'font-family="Instrument Sans,sans-serif">piden {eur(pedido)}</text></svg>',
+            unsafe_allow_html=True)
 
-# ───────────────────────── pestaña · mercado ──────────────────────────
+# ───────────────────── pestaña · comparar barrios ─────────────────────
+with tabZ:
+    st.markdown('<h2 class="sec">La misma vivienda, barrio por barrio</h2>'
+                f'<p class="sub">Cuánto costaría este piso de {num(area)} m² en cada zona '
+                f'de {ciudad}, con las mismas características.</p>', unsafe_allow_html=True)
+    rank = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
+    mx = rank[0][1]
+    filas = []
+    for d, v, est in rank:
+        act = d == distrito
+        dif = (v - p50) / p50 * 100
+        filas.append(
+            f'<tr style="{"font-weight:600" if act else ""}">'
+            f'<td>{d}{" · esta vivienda" if act else ""}'
+            f'{" *" if est else ""}</td>'
+            f'<td class="m">{eur(v)}</td><td class="m">{eur(v/area)}</td>'
+            f'<td class="m" style="color:{VERDE if dif>0 else (ROJO if dif<0 else MUTE)}">'
+            f'{"+" if dif>0 else ""}{dif:.0f} %</td>'
+            f'<td style="width:34%"><svg viewBox="0 0 200 14" width="100%" '
+            f'style="display:block" aria-hidden="true">'
+            f'<rect x="0" y="2" width="{max(v/mx*200,2):.0f}" height="10" rx="1" '
+            f'fill="{ACC}" opacity="{.35+.65*v/mx:.2f}"/></svg></td></tr>')
+    st.markdown(
+        f'<table class="tb"><caption>Ordenado de más caro a más barato. El porcentaje '
+        f'compara con el barrio elegido.</caption><tr><th>Barrio</th>'
+        f'<th>Precio total</th><th>Por m²</th><th>Diferencia</th><th></th></tr>'
+        f'{"".join(filas)}</table>'
+        + ('<div class="nota" style="margin-top:14px">* De estos barrios no se publica '
+           'precio propio; se usa la media de la ciudad.</div>'
+           if any(e for _, _, e in rank) else ''), unsafe_allow_html=True)
+
+# ─────────────────────── pestaña · fiabilidad ─────────────────────────
 with tabM:
     R = resumen()
-    st.markdown('<div class="eb">Rendimiento · validación por bloques espaciales</div>',
+    st.markdown('<h2 class="sec">Hasta qué punto acierta</h2>'
+                '<p class="sub">Medido sobre viviendas que el modelo no había visto nunca, '
+                'apartando barrios enteros para que no pueda copiar de vecinos.</p>',
                 unsafe_allow_html=True)
     st.markdown(
         f'<div class="kpi">'
-        f'<div><div class="v">{meta["r2_bloques"]:.3f}</div><div class="k">R² · {ciudad}</div></div>'
-        f'<div><div class="v">{eur(meta["mae"])}</div><div class="k">Error medio</div></div>'
-        f'<div><div class="v">{meta["cobertura_intervalo"]*100:.1f} %</div>'
-        f'<div class="k">Cobertura (teórica 80 %)</div></div>'
-        f'<div><div class="v">{num(meta["n_anuncios"])}</div><div class="k">Anuncios</div></div>'
-        f'</div>', unsafe_allow_html=True)
+        f'<div><div class="v">{meta["r2_bloques"]*100:.1f} %</div>'
+        f'<div class="k">de la variación de precios queda explicada</div></div>'
+        f'<div><div class="v">{eur(meta["mae"])}</div>'
+        f'<div class="k">de error medio por vivienda</div></div>'
+        f'<div><div class="v">{meta["cobertura_intervalo"]*100:.0f} de cada 100</div>'
+        f'<div class="k">viviendas caen dentro del margen que damos</div></div>'
+        f'<div><div class="v">{num(meta["n_anuncios"])}</div>'
+        f'<div class="k">viviendas reales analizadas en {ciudad}</div></div></div>',
+        unsafe_allow_html=True)
 
     st.markdown("<div style='height:34px'></div>", unsafe_allow_html=True)
     m1, m2 = st.columns([1.15, 1], gap="large")
     with m1:
-        st.markdown('<div class="eb">Los tres mercados</div>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sec">Las tres ciudades</h2>', unsafe_allow_html=True)
         fl = "".join(
-            f'<tr><td>{c}</td><td class="m">{R[c]["r2_bloques"]:.3f}</td>'
+            f'<tr><td>{c}</td><td class="m">{R[c]["r2_bloques"]*100:.1f} %</td>'
             f'<td class="m">{eur(R[c]["mae"])}</td>'
             f'<td class="m">{R[c]["cobertura_intervalo"]*100:.0f} %</td>'
-            f'<td class="m" style="color:{ACC}">×{R[c]["factor_ciudad"]:.2f}</td></tr>'
-            for c in CIUDADES)
+            f'<td class="m">{num(R[c]["n_anuncios"])}</td></tr>' for c in CIUDADES)
         st.markdown(
-            f'<table class="tb"><tr><th>Mercado</th><th>R²</th><th>Error medio</th>'
-            f'<th>Cobertura</th><th>Reindexado</th></tr>{fl}</table>'
-            f'<div class="nota" style="margin-top:14px">València, con un nivel de precio '
-            f'menos de la mitad que Madrid, funciona como prueba de generalización: la misma '
-            f'arquitectura cede <b>{R["Madrid"]["r2_bloques"]-R["Valencia"]["r2_bloques"]:.3f}'
-            f'</b> de R² al trasladarse a un mercado estructuralmente distinto.</div>',
-            unsafe_allow_html=True)
+            f'<table class="tb"><tr><th>Ciudad</th><th>Acierto</th><th>Error medio</th>'
+            f'<th>Dentro del margen</th><th>Viviendas</th></tr>{fl}</table>'
+            f'<div class="nota" style="margin-top:14px">València cuesta menos de la mitad '
+            f'que Madrid y aun así el modelo funciona: pierde '
+            f'<b>{(R["Madrid"]["r2_bloques"]-R["Valencia"]["r2_bloques"])*100:.1f} puntos'
+            f'</b> de acierto. Es la prueba de que el método sirve en mercados distintos.'
+            f'</div>', unsafe_allow_html=True)
     with m2:
-        st.markdown('<div class="eb">Revalorización por distrito · 2018 a 2026</div>',
-                    unsafe_allow_html=True)
+        st.markdown('<h2 class="sec">Cuánto ha subido cada barrio</h2>'
+                    '<p class="sub">Desde 2018 hasta hoy.</p>', unsafe_allow_html=True)
         dd = sorted([(d, v) for d, v in meta["distritos"].items()
                      if v["n"] >= 120 and not v["estimado"]],
                     key=lambda x: -x[1]["factor"])[:10]
+        desc_subidas = "; ".join(
+            f"{d} más {(v['factor']-1)*100:.0f} por ciento" for d, v in dd)
         if dd:
-            mx = max(v["factor"] for _, v in dd)
+            mxf = max(v["factor"] for _, v in dd)
             rows = "".join(
-                f'<text x="0" y="{i*28+13}" fill="{INK}" font-size="12" '
+                f'<text x="0" y="{i*30+14}" fill="{INK}" font-size="13" '
                 f'font-family="Instrument Sans,sans-serif">{d}</text>'
-                f'<rect x="190" y="{i*28+3}" width="{max(v["factor"]/mx*205,2):.1f}" '
-                f'height="12" fill="{ACC}" opacity="{.3+.7*v["factor"]/mx:.2f}" rx="1"/>'
-                f'<text x="{190+max(v["factor"]/mx*205,2)+9:.1f}" y="{i*28+13}" fill="{MUTE}" '
-                f'font-size="10.5" font-family="IBM Plex Mono,monospace">'
-                f'×{v["factor"]:.2f}</text>'
-                f'<line x1="0" y1="{i*28+21}" x2="460" y2="{i*28+21}" stroke="{LINE}"/>'
-                for i, (d, v) in enumerate(dd))
-            st.markdown(f'<svg viewBox="0 0 460 {len(dd)*28}" width="100%" '
-                        f'style="display:block">{rows}</svg>', unsafe_allow_html=True)
-        st.markdown('<div class="nota" style="margin-top:12px">Un factor único de ciudad '
-                    'ignoraría esta dispersión.</div>', unsafe_allow_html=True)
+                f'<rect x="190" y="{i*30+3}" width="{max(v["factor"]/mxf*180,2):.1f}" '
+                f'height="13" fill="{ACC}" opacity="{.35+.65*v["factor"]/mxf:.2f}" rx="1"/>'
+                f'<text x="{190+max(v["factor"]/mxf*180,2)+10:.1f}" y="{i*30+14}" '
+                f'fill="{INK}" font-size="12" font-family="IBM Plex Mono,monospace">'
+                f'+{(v["factor"]-1)*100:.0f} %</text>'
+                f'<line x1="0" y1="{i*30+22}" x2="460" y2="{i*30+22}" stroke="{LINE}" '
+                f'opacity=".6"/>' for i, (d, v) in enumerate(dd))
+            st.markdown(
+                f'<svg viewBox="0 0 460 {len(dd)*30}" width="100%" role="img" '
+                f'aria-label="Subida de precios por barrio desde 2018. '
+                f'{desc_subidas}." '
+                f'style="display:block">{rows}</svg>', unsafe_allow_html=True)
+        st.markdown('<div class="nota" style="margin-top:12px">No todos los barrios han '
+                    'subido igual, por eso actualizamos barrio a barrio y no con una media '
+                    'de ciudad.</div>', unsafe_allow_html=True)
 
-# ───────────────────────── pestaña · metodología ──────────────────────
+# ─────────────────────── pestaña · cómo funciona ──────────────────────
 with tabD:
+    st.markdown('<h2 class="sec">Cómo se calcula</h2>'
+                '<p class="sub">Sin tecnicismos.</p>', unsafe_allow_html=True)
     d1, d2 = st.columns(2, gap="large")
     bloques = [
-        ("Datos", f"{num(meta['n_anuncios'])} anuncios de {ciudad} "
-         f"({num(meta['n_viviendas'])} viviendas únicas) de los cuatro trimestres de 2018, "
-         f"del conjunto abierto <i>idealista18</i> (Rey-Blanco, Arbués, López y Páez, "
-         f"<i>Environment and Planning B</i>, 2024; licencia ODbL), enriquecido con "
-         f"información catastral."),
-        ("Modelo", "Ensamblado de árboles con refuerzo de gradiente sobre el logaritmo del "
-         "precio por metro cuadrado, no sobre el precio total: así el valor sigue creciendo "
-         "con la superficie más allá del rango con datos abundantes, en lugar de saturarse. "
-         "Se imponen restricciones de monotonía en las variables cuyo signo no admite duda."),
-        ("Incertidumbre", f"Tres modelos de regresión cuantílica (percentiles 10, 50 y 90) "
-         f"dan un intervalo propio a cada inmueble, estrecho en viviendas corrientes y ancho "
-         f"en las atípicas. La cobertura real medida es del "
-         f"{meta['cobertura_intervalo']*100:.1f} % frente al 80 % teórico."),
-        ("Validación", "Cruzada por bloques espaciales de unos 100 metros, que agrupan "
-         "también los anuncios repetidos del mismo inmueble entre trimestres y evitan así "
-         "la fuga de información entre entrenamiento y contraste."),
-        ("Actualización", "La estructura relativa se aprende de 2018; el nivel de precios "
-         "procede del índice publicado por distrito en agosto de 2026. La correlación de "
-         "rangos entre el mapa de valor de 2018 y el actual es de 0,975 en Madrid: la "
-         "geografía del valor apenas ha cambiado, solo su nivel."),
-        ("Límites", f"Si desde 2018 ha cambiado <i>qué</i> valora el comprador —y algo ha "
-         f"cambiado, como el peso del espacio exterior— el modelo no lo recoge. Por encima "
-         f"del percentil 99 de superficie ({p99} m² en {ciudad}) la estimación se marca como "
-         f"orientativa. No sustituye a una tasación homologada."),
+        ("De dónde salen los datos",
+         f"De {num(meta['n_anuncios'])} viviendas reales puestas a la venta en {ciudad}, "
+         f"con sus características y su precio, publicadas por idealista para uso "
+         f"académico y completadas con datos del Catastro."),
+        ("Qué aprende el modelo",
+         "Cuánto suma o resta cada cosa: un baño más, un ascensor, estar a cinco minutos "
+         "del metro, ser un bajo o un ático. Aprende proporciones, no precios absolutos."),
+        ("Por qué está actualizado",
+         "Las proporciones cambian poco con los años, pero los precios suben. Por eso el "
+         "nivel de precios se toma del índice publicado cada mes, barrio a barrio. "
+         "Comparando el mapa de 2018 con el de hoy, el orden de los barrios es casi "
+         "idéntico: lo que ha cambiado es cuánto cuestan, no cuáles son los caros."),
+        ("Por qué damos un margen y no una cifra exacta",
+         f"Ninguna estimación acierta al euro. En vez de fingir precisión, damos una franja "
+         f"y decimos cuánto acierta: {meta['cobertura_intervalo']*100:.0f} de cada 100 "
+         f"viviendas caen dentro de ella. En pisos corrientes la franja es estrecha; en "
+         f"viviendas raras, ancha."),
+        ("Cómo comprobamos que acierta",
+         "Apartamos barrios enteros, entrenamos sin ellos y luego pedimos al modelo que los "
+         "valore. Así no puede acertar copiando del piso de al lado, que es la trampa más "
+         "habitual en este tipo de modelos."),
+        ("Qué no puede hacer",
+         f"No sabe si la cocina está reformada ni si hay obras enfrente. Si desde 2018 ha "
+         f"cambiado lo que la gente valora —por ejemplo la terraza tras la pandemia— tampoco "
+         f"lo recoge. Por encima de {p99} m² hay pocas viviendas con las que comparar. "
+         f"No sustituye a una tasación oficial."),
     ]
     for i, (t, c) in enumerate(bloques):
         with (d1 if i % 2 == 0 else d2):
-            st.markdown(f'<div style="margin-bottom:28px"><div class="eb">{t}</div>'
+            st.markdown(f'<div style="margin-bottom:30px"><h2 class="sec">{t}</h2>'
                         f'<div class="nota">{c}</div></div>', unsafe_allow_html=True)
+
+    with st.expander("Detalle técnico y fuentes"):
+        st.markdown(f"""
+<div class="nota">
+<b>Conjunto de datos.</b> <i>idealista18</i> — Rey-Blanco, Arbués, López y Páez (2024),
+<i>Environment and Planning B: Urban Analytics and City Science</i>,
+DOI 10.1177/23998083241242844, licencia ODbL. {num(meta['n_anuncios'])} anuncios de
+{ciudad} ({num(meta['n_viviendas'])} viviendas únicas) de los cuatro trimestres de 2018.<br><br>
+<b>Modelo.</b> Árboles con refuerzo de gradiente sobre el logaritmo del precio por metro
+cuadrado, con restricciones de monotonía en las variables de signo inequívoco. Modelar el
+precio unitario evita que la estimación se sature en viviendas grandes.<br><br>
+<b>Incertidumbre.</b> Regresión cuantílica en los percentiles 10, 50 y 90. Cobertura
+empírica {meta['cobertura_intervalo']*100:.1f} % frente al 80 % teórico.<br><br>
+<b>Validación.</b> Cruzada por bloques espaciales de unos 100 metros, que agrupan los
+anuncios repetidos del mismo inmueble entre trimestres.<br><br>
+<b>Actualización.</b> Nivel de precios por distrito de agosto de 2026. Correlación de rangos
+entre el mapa de valor de 2018 y el actual: 0,975 en Madrid.
+</div>""", unsafe_allow_html=True)
+
+# ───────────────────────────── accesibilidad ──────────────────────────
+st.markdown("<div style='height:30px'></div>", unsafe_allow_html=True)
+with st.expander("Accesibilidad"):
+    x1, x2 = st.columns(2)
+    x1.checkbox("Alto contraste", key="alto_contraste",
+                help="Blanco y negro puros, bordes marcados y colores más saturados.")
+    x2.checkbox("Texto grande", key="texto_grande",
+                help="Aumenta un 16 % el tamaño de toda la letra.")
+    st.markdown('<div class="nota" style="margin-top:10px">Todos los gráficos llevan '
+                'descripción para lectores de pantalla, los avisos no dependen solo del '
+                'color y las animaciones se desactivan si tu sistema lo pide.</div>',
+                unsafe_allow_html=True)
 
 st.markdown(
     f'<div class="pie"><div>Valora · Motor de valoración residencial</div>'
-    f'<div>Estructura idealista18 2018 · Nivel agosto 2026</div>'
-    f'<div>No sustituye a una tasación homologada</div></div>', unsafe_allow_html=True)
+    f'<div>Datos idealista18 (2018) · Precios de agosto de 2026</div>'
+    f'<div>Estimación orientativa · No sustituye a una tasación oficial</div></div>',
+    unsafe_allow_html=True)
