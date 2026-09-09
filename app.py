@@ -548,44 +548,50 @@ if tabV.activa:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        oeste, este = clon - dlo, clon + dlo
-        sur, norte = clat - DLA, clat + DLA
-        capas = [
-            pdk.Layer("BitmapLayer",
-                      image=f"data:image/png;base64,{b64}",
-                      bounds=[oeste, sur, este, norte], opacity=1.0),
-            pdk.Layer("TextLayer",
-                      data=[{"lon": float(cen[cen.distrito == d].lon.mean()),
-                             "lat": float(cen[cen.distrito == d].lat.mean()),
-                             "t": d}
-                            for d, _, _ in rank_mapa[:12]
-                            if len(cen[cen.distrito == d])],
+        # Imagen de la superficie de precios renderizada directamente por Streamlit
+        _zb = np.ascontiguousarray(Z).tobytes()
+        _b64 = png(_zb, Z.shape, lo_z, hi_z, STOPS, alfa=False)
+        _raw = base64.b64decode(_b64)
+        _im = Image.open(BytesIO(_raw)).convert("RGB")
+        st.image(_im, use_container_width=True, output_format="PNG")
+
+        # Mapa interactivo solo para el pin y los rótulos de barrio
+        _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
+        _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
+                  "lat": float(cen[cen.distrito == d].lat.mean()), "t": d}
+                 for d, _, _ in _rank_m[:12] if len(cen[cen.distrito == d])]
+        _capas = [
+            pdk.Layer("TextLayer", data=_labs,
                       get_position="[lon, lat]", get_text="t",
                       get_size=13, get_color=[26, 29, 27],
-                      get_alignment_baseline="'center'",
-                      outline_width=4, outline_color=[255, 255, 255],
                       font_family="'Instrument Sans', sans-serif",
-                      character_set="auto", font_settings={"sdf": True}),
+                      character_set="auto", font_settings={"sdf": True},
+                      get_alignment_baseline="'center'",
+                      outline_width=4, outline_color=[255, 255, 255]),
             pdk.Layer("ScatterplotLayer",
                       data=[{"lon": lon0, "lat": lat0}],
-                      get_position="[lon, lat]", get_radius=110,
+                      get_position="[lon, lat]", get_radius=120,
                       get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
-                      line_width_min_pixels=3, stroked=True, radius_min_pixels=7),
+                      line_width_min_pixels=3, stroked=True, radius_min_pixels=8),
         ]
         st.pydeck_chart(pdk.Deck(
-            layers=capas,
-            initial_view_state=pdk.ViewState(latitude=lat0, longitude=lon0, zoom=11.1),
-            map_style="light", tooltip=False), height=470)
+            layers=_capas,
+            initial_view_state=pdk.ViewState(
+                latitude=lat0, longitude=lon0, zoom=11.1),
+            map_style="light", tooltip=False), height=320)
+
         st.markdown(
-            f'<figcaption class="nota" style="margin-top:12px"><b>Qué estás viendo:</b> '
+            f'<figcaption class="nota" style="margin-top:8px"><b>Qué estás viendo:</b> '
             f'el precio de <b>esta misma vivienda</b> si estuviera en cada punto de '
-            f'{ciudad}, sobre el callejero real. El punto marca dónde está. Cuanto más '
-            f'intenso el verde, más cara la zona. Puedes arrastrar y hacer zoom.'
-            f'</figcaption>'
+            f'{ciudad}. Cuanto más oscuro el verde, más cara la zona. El mapa de abajo '
+            f'es interactivo: puedes arrastrar y hacer zoom.</figcaption>'
             f'<div class="esc"><span>{eur(lo_z)}</span>'
-            f'<span class="bar esc-bar"></span>'
+            f'<span class="bar" style="flex:0 0 150px;height:10px;border-radius:2px;'
+            f'border:1px solid #CFC8B9;background:linear-gradient(90deg,'
+            f'#EEE9E2,#8CB8A0 50%,#0B4D3D)"></span>'
             f'<span>{eur(hi_z)}</span><span style="flex:1"></span>'
-            f'<span>zona barata → zona cara</span></div>', unsafe_allow_html=True)
+            f'<span>zona barata → zona cara</span></div>',
+            unsafe_allow_html=True)
 
     st.markdown("<div style='height:38px'></div>", unsafe_allow_html=True)
 
@@ -738,6 +744,11 @@ if tabZ.activa:
 # ─────────────────────── pestaña · fiabilidad ─────────────────────────
 if tabM.activa:
     R = resumen()
+    # normalizar: si resumen devuelve metas completos, extraer las claves necesarias
+    def _stat(d, k, default=0):
+        if k in d: return d[k]
+        if 'r2_bloques' in d and k == 'n_anuncios': return d.get('n_anuncios', default)
+        return d.get(k, default)
     st.markdown('<h2 class="sec">Hasta qué punto acierta</h2>'
                 '<p class="sub">Medido sobre viviendas que el modelo no había visto nunca, '
                 'apartando barrios enteros para que no pueda copiar de vecinos.</p>',
@@ -768,7 +779,7 @@ if tabM.activa:
             f'<th>Dentro del margen</th><th>Viviendas</th></tr>{fl}</table>'
             f'<div class="nota" style="margin-top:14px">València cuesta menos de la mitad '
             f'que Madrid y aun así el modelo funciona: pierde '
-            f'<b>{(R["Madrid"]["r2_bloques"]-R["Valencia"]["r2_bloques"])*100:.1f} puntos'
+            f'<b>{(_stat(R.get("Madrid",{}),"r2_bloques",0)-_stat(R.get("Valencia",{}),"r2_bloques",0))*100:.1f} puntos'
             f'</b> de acierto. Es la prueba de que el método sirve en mercados distintos.'
             f'</div>', unsafe_allow_html=True)
     with m2:
