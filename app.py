@@ -14,7 +14,8 @@ ART = BASE / "artefactos"
 if not (ART / "madrid_meta.json").exists() and (ART / "artefactos").exists():
     ART = ART / "artefactos"
 
-st.set_page_config(page_title="Aldaba · Llama a cualquier puerta",
+st.set_page_config(page_title="© 2026 Aldaba",
+                   page_icon="🚪",
                    layout="wide", initial_sidebar_state="collapsed")
 
 # ── preferencias de accesibilidad (leídas antes de pintar los estilos) ──
@@ -59,7 +60,17 @@ def indice():
 
 @st.cache_data(show_spinner=False)
 def resumen():
-    return json.loads((ART / "resumen.json").read_text(encoding="utf-8"))
+    p = ART / "resumen.json"
+    if not p.exists():
+        return {c: json.loads((ART / f"{c.lower()}_meta.json").read_text(encoding='utf-8'))
+                for c in ['Madrid','Barcelona','Valencia'] if (ART / f"{c.lower()}_meta.json").exists()}
+    raw = json.loads(p.read_text(encoding='utf-8'))
+    # resumen.json puede contener los meta completos o solo un subconjunto de claves
+    for c in list(raw.keys()):
+        if 'r2_bloques' not in raw[c]:
+            mp = ART / f"{c.lower()}_meta.json"
+            if mp.exists(): raw[c] = json.loads(mp.read_text(encoding='utf-8'))
+    return raw
 
 
 IDX = indice()
@@ -106,13 +117,19 @@ html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK};
  font-size:{FS}rem}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}}
 
+::-webkit-scrollbar{{width:6px;height:6px}}
+::-webkit-scrollbar-thumb{{background:{LINE};border-radius:3px}}
+::selection{{background:{ACC};color:#FFFFFF}}
 a:focus-visible,button:focus-visible,input:focus-visible,
 [role="tab"]:focus-visible,summary:focus-visible{{outline:3px solid {ACC};outline-offset:2px}}
 .saltar{{position:absolute;left:-9999px}}
 .saltar:focus{{position:static;display:inline-block;background:{ACC};color:#fff;
  padding:8px 14px;margin:8px 0}}
 
-.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 0;padding:30px 3rem 26px}}
+.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 0;padding:30px 3rem 26px;
+ display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}}
+.cab-badge{{font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;
+ letter-spacing:.14em;text-transform:uppercase;color:{CREMA};opacity:.85}}
 .marca{{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}}
 .tag{{font-size:{.9*FS}rem;color:{CREMA};font-style:italic}}
 .navlinea{{border-bottom:2px solid {LINE};margin:0 -3rem 30px}}
@@ -158,6 +175,8 @@ p.sub{{font-size:{.92*FS}rem;color:{MUTE};margin:0 0 18px;line-height:1.55}}
 .esc{{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;
  font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;color:{MUTE}}}
 .esc .bar{{flex:0 0 170px;height:10px;border-radius:2px;border:1px solid {LINE}}}
+.esc-bar{{flex:0 0 170px;height:10px;border-radius:2px;border:1px solid {LINE};
+ background:linear-gradient(90deg,#EEE9E2,#8CB8A0 50%,#0B4D3D)}}
 
 .nota{{font-size:{.9*FS}rem;line-height:1.62;color:{MUTE}}}
 .nota b{{color:{INK};font-weight:600}}
@@ -238,9 +257,12 @@ PAGINAS = [("valorar", "Valorar"), ("comparar", "Comparar barrios"),
 if "pagina" not in st.session_state:
     st.session_state.pagina = "inicio"
 
-st.markdown('<div class="cab"><div class="marca">'
-            '<span class="wm">Aldaba</span>'
-            '<span class="tag">Llama a cualquier puerta</span></div></div>',
+st.markdown(f'<div class="cab"><div class="marca">'
+            f'<span class="wm">Aldaba</span>'
+            f'<span class="tag">Llama a cualquier puerta</span></div>'
+            f'<div class="cab-badge">Precios · '
+            f'{IDX["fecha_corta"] if IDX else "ago-2026"}</div></div>',
+           
             unsafe_allow_html=True)
 
 nav = st.columns([1.2] + [1] * len(PAGINAS) + [3.2])
@@ -254,7 +276,7 @@ st.markdown('<div class="navlinea"></div>', unsafe_allow_html=True)
 
 if PAG == "inicio":
     R0 = resumen()
-    _tot = sum(v["n_anuncios"] for v in R0.values())
+    _tot = sum(v.get("n_anuncios",0) for v in R0.values())
     st.markdown(
         f'<div class="portada">'
         f'<h1>Llama a cualquier puerta<br>'
@@ -266,7 +288,7 @@ if PAG == "inicio":
         f'<div><div class="v">3</div><div class="k">ciudades cubiertas</div></div>'
         f'<div><div class="v">{num(_tot)}</div>'
         f'<div class="k">viviendas analizadas</div></div>'
-        f'<div><div class="v">{max(v["r2_bloques"] for v in R0.values())*100:.0f} %</div>'
+        f'<div><div class="v">{max((v.get("r2_bloques",0) for v in R0.values()), default=0)*100:.0f} %</div>'
         f'<div class="k">de acierto en el mejor mercado</div></div>'
         f'<div><div class="v">{IDX["fecha_corta"] if IDX else "ago-2026"}</div>'
         f'<div class="k">precios actualizados a</div></div></div>',
@@ -280,15 +302,15 @@ if PAG == "inicio":
         ("¿Y si fuera en otro barrio?", "La misma vivienda valorada en todas las zonas, "
          "ordenadas de más cara a más barata.")]):
         _col.markdown(f'<div class="tarj" style="height:100%"><div class="t" '
-                      f'style="font-size:1.15rem">{_t}</div>'
-                      f'<div class="d">{_d}</div></div>', unsafe_allow_html=True)
+                      f'style="font-size:1.15rem;color:{INK}">{_t}</div>'
+                      f'<div class="d" style="color:{MUTE}">{_d}</div></div>', unsafe_allow_html=True)
     st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
     if st.button("Valorar una vivienda", key="cta", type="primary"):
         st.session_state.pagina = "valorar"
         st.rerun()
     st.markdown(
-        f'<div class="pie"><div>Aldaba · Llama a cualquier puerta</div>'
-        f'<div>Datos idealista18 (2018) · Precios de '
+        f'<div class="pie"><div>© 2026 Aldaba</div>'
+        f'<div>Datos idealista18 (2018) · Precios de  (<a href="https://github.com/paezha/idealista18" target="_blank" style="color:{MUTE};text-decoration:underline">enlace</a>) · '
         f'{IDX["fecha"] if IDX else "agosto de 2026"}</div>'
         f'<div>Estimación orientativa · No sustituye a una tasación oficial</div></div>',
         unsafe_allow_html=True)
@@ -561,8 +583,7 @@ if tabV.activa:
             f'intenso el verde, más cara la zona. Puedes arrastrar y hacer zoom.'
             f'</figcaption>'
             f'<div class="esc"><span>{eur(lo_z)}</span>'
-            f'<span class="bar" style="background:linear-gradient(90deg,'
-            f'rgba{STOPS[0][1]+(0.3,)},rgb{STOPS[-2][1]} 72%,rgb{STOPS[-1][1]})"></span>'
+            f'<span class="bar esc-bar"></span>'
             f'<span>{eur(hi_z)}</span><span style="flex:1"></span>'
             f'<span>zona barata → zona cara</span></div>', unsafe_allow_html=True)
 
@@ -849,7 +870,7 @@ with st.expander("Accesibilidad"):
                 unsafe_allow_html=True)
 
 st.markdown(
-    f'<div class="pie"><div>Aldaba · Llama a cualquier puerta</div>'
-    f'<div>Datos idealista18 (2018) · Precios de {IDX["fecha"]}</div>'
+    f'<div class="pie"><div>© 2026 Aldaba</div>'
+    f'<div>Datos idealista18 (2018) · Precios de {IDX["fecha"]}</div> (<a href=\"https://github.com/paezha/idealista18\" target=\"_blank\" style=\"color:{MUTE};text-decoration:underline\">enlace</a>)'
     f'<div>Estimación orientativa · No sustituye a una tasación oficial</div></div>',
     unsafe_allow_html=True)
