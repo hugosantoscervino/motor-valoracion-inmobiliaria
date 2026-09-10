@@ -123,10 +123,14 @@ header[data-testid="stHeader"],#MainMenu,footer,[data-testid="stToolbar"],
 [data-testid="collapsedControl"],[data-testid="stSidebarCollapseButton"],
 section[data-testid="stSidebar"]{{display:none!important}}
 .stApp{{background:{BG}}}
+/* el contenedor padre no debe apretar */
+[data-testid="stAppViewContainer"],[data-testid="stMain"],
+section.main,.main{{max-width:100%!important;width:100%!important}}
+/* y el bloque de contenido, ancho y centrado */
 .block-container,[data-testid="stMainBlockContainer"],
 section.main>div.block-container{{
- padding:0 2.6rem 5rem!important;max-width:min(1860px,95vw)!important;
- width:100%!important}}
+ padding:0 2.6rem 5rem!important;max-width:min(1880px,96vw)!important;
+ width:100%!important;margin-left:auto!important;margin-right:auto!important}}
 html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK};
  font-size:{FS}rem}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
