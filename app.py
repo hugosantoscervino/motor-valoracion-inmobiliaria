@@ -116,7 +116,8 @@ section[data-testid="stSidebar"]{{display:none!important}}
 .block-container{{padding:0 3rem 5rem!important;max-width:1600px!important;width:100%!important}}
 html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK};
  font-size:{FS}rem}}
-.m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}}
+.m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
+ color:{INK}}}
 
 ::-webkit-scrollbar{{width:6px;height:6px}}
 ::-webkit-scrollbar-thumb{{background:{LINE};border-radius:3px}}
@@ -202,10 +203,13 @@ p.sub{{font-size:{.92*FS}rem;color:{MUTE};margin:0 0 18px;line-height:1.55}}
 .kpi .k{{font-size:{.78*FS}rem;color:{MUTE};margin-top:6px;line-height:1.4}}
 
 table.tb{{width:100%;border-collapse:collapse;font-size:{.92*FS}rem}}
+table.tb{{color:{INK}}}
 table.tb th{{font-size:{.76*FS}rem;color:{MUTE};font-weight:500;text-align:right;
  padding-bottom:10px;border-bottom:1px solid {LINE}}}
 table.tb th:first-child{{text-align:left}}
-table.tb td{{padding:12px 0;border-bottom:1px solid {LINE};text-align:right}}
+table.tb td{{padding:12px 0;border-bottom:1px solid {LINE};text-align:right;
+ color:{INK}}}
+table.tb td .m,table.tb td.m{{color:{INK}}}
 table.tb td:first-child{{text-align:left}}
 table.tb caption{{caption-side:top;text-align:left;font-size:{.9*FS}rem;color:{MUTE};
  padding-bottom:12px}}
