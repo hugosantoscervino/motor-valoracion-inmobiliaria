@@ -613,7 +613,16 @@ if tabV.activa:
         for _k in range(3):
             _rgba[..., _k] = np.clip(
                 np.interp(_t, _ps, [p[1][_k] for p in _stops]), 0, 255)
-        _rgba[..., 3] = (np.clip(0.18 + 0.62 * _t, 0, 1) * 255).astype(np.uint8)
+        # Distancia de cada punto de la malla al barrio más próximo, en km
+        _dmin = np.sqrt(_dd2.min(axis=1)).reshape(_NY2, _NX2) * KM
+        # Opacidad plena hasta 1,3 km de un barrio; se apaga del todo a 3,2 km
+        _mask = np.clip((3.2 - _dmin) / 1.9, 0.0, 1.0)
+        _mask = _mask * _mask * (3 - 2 * _mask)          # suavizado
+        # y un desvanecido extra en el propio borde de la imagen
+        _fy = np.clip(np.minimum(np.arange(_NY2), _NY2 - 1 - np.arange(_NY2)) / 7.0, 0, 1)
+        _fx = np.clip(np.minimum(np.arange(_NX2), _NX2 - 1 - np.arange(_NX2)) / 7.0, 0, 1)
+        _mask *= _fy[:, None] * _fx[None, :]
+        _rgba[..., 3] = (np.clip(0.20 + 0.62 * _t, 0, 1) * _mask * 255).astype(np.uint8)
         _img = Image.fromarray(_rgba, "RGBA").resize(
             (_NX2 * 9, _NY2 * 9), Image.BICUBIC)
         _buf = BytesIO(); _img.save(_buf, "PNG", optimize=True)
@@ -623,7 +632,7 @@ if tabV.activa:
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
         _marcas = [{"lat": float(cen[cen.distrito == d].lat.mean()),
                     "lon": float(cen[cen.distrito == d].lon.mean()), "t": d}
-                   for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
+                   for d, _, _ in _rank_m[:9] if len(cen[cen.distrito == d])]
 
         _html = """
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -632,13 +641,15 @@ if tabV.activa:
  html,body{margin:0;padding:0;background:__BG__}
  #m{width:100%;height:__H__px;border:1px solid __LINE__;border-radius:4px}
  .leaflet-container{background:__BG__;font-family:'Instrument Sans',sans-serif}
+ .leaflet-tile-pane{filter:grayscale(.92) brightness(1.07) contrast(.9)}
+ .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.7)}
  #tt{position:absolute;z-index:1000;pointer-events:none;display:none;
      background:#FFFFFF;border:1px solid __LINE__;border-radius:4px;
      padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;
      color:__INK__;box-shadow:0 2px 10px rgba(0,0,0,.13);white-space:nowrap}
  #tt b{font-size:14px}
  .bq{background:rgba(255,255,255,.82);border:none;border-radius:3px;
-     padding:1px 5px;font-size:11px;font-weight:500;color:__INK__;
+     padding:1px 5px;font-size:10.5px;font-weight:500;color:__INK__;
      box-shadow:none;white-space:nowrap}
  .bq:before{display:none}
 </style>
@@ -648,8 +659,8 @@ const LA_A=__LAA__, LA_B=__LAB__, LO_A=__LOA__, LO_B=__LOB__;
 const NY=__NY__, NX=__NX__, P=__PRECIOS__, MARCAS=__MARCAS__;
 const map=L.map('m',{zoomControl:true,attributionControl:true})
   .fitBounds([[LA_A,LO_A],[LA_B,LO_B]]);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  {maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
 L.imageOverlay('__URI__',[[LA_A,LO_A],[LA_B,LO_B]],{opacity:1,interactive:false})
   .addTo(map);
 MARCAS.forEach(function(d){
