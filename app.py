@@ -579,7 +579,11 @@ if tabV.activa:
         _loA, _loB = cen.lon.min() - _mlo, cen.lon.max() + _mlo
         _mlat, _mlon = (_laA + _laB) / 2, (_loA + _loB) / 2
 
-        _NY2, _NX2 = 44, 42
+        _ancho_km = (_loB - _loA) * KM * math.cos(math.radians(clat))
+        _alto_km  = (_laB - _laA) * KM
+        _SEP_KM = 0.28                      # separación entre puntos de la malla
+        _NX2 = max(30, int(_ancho_km / _SEP_KM))
+        _NY2 = max(30, int(_alto_km  / _SEP_KM))
         _LA2, _LO2 = np.meshgrid(np.linspace(_laB, _laA, _NY2),
                                  np.linspace(_loA, _loB, _NX2), indexing="ij")
         _b2 = dict(meta["medianas"])
@@ -618,8 +622,8 @@ if tabV.activa:
                  "precio": int(_Z2[j, i])}
                 for j in range(_NY2) for i in range(_NX2)]
 
-        # cell_size = separación real entre puntos de la retícula
-        _sep = int((_loB - _loA) * KM * math.cos(math.radians(clat)) / _NX2 * 1000)
+        # La celda triplica la separación: cada celda recoge ~9 puntos y no quedan huecos
+        _sep = int(_SEP_KM * 3 * 1000)
         _capa_contorno = pdk.Layer(
             "ContourLayer", data=_pts,
             get_position="[lon, lat]", get_weight="precio",
@@ -637,7 +641,7 @@ if tabV.activa:
             _capa_contorno,
             # Capa invisible que aporta el precio exacto al pasar el cursor
             pdk.Layer("ScatterplotLayer", data=_pts,
-                      get_position="[lon, lat]", get_radius=int(_sep * 0.6),
+                      get_position="[lon, lat]", get_radius=int(_SEP_KM * 1000 * 0.7),
                       get_fill_color=[0, 0, 0, 1], pickable=True,
                       radius_min_pixels=5),
             pdk.Layer("TextLayer", data=_labs,
