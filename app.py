@@ -20,6 +20,10 @@ st.set_page_config(page_title="© 2026 Aldaba",
                    layout="wide", initial_sidebar_state="collapsed")
 
 # ── preferencias de accesibilidad (leídas antes de pintar los estilos) ──
+_qp = st.query_params
+def _qs(k, d):
+    v = _qp.get(k)
+    return v if v is not None else d
 AC = st.session_state.get("alto_contraste", False)
 TG = st.session_state.get("texto_grande", False)
 
@@ -51,6 +55,12 @@ def cargar(ciudad):
     mods = {q: xgb.Booster(model_file=str(ART / f"{ciudad.lower()}_{q}.ubj"))
             for q in ("q10", "q50", "q90")}
     return meta, mods, pd.DataFrame(meta["centroides"])
+
+
+@st.cache_data(show_spinner=False)
+def extra(nombre):
+    p = ART / nombre
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 @st.cache_data(show_spinner=False)
@@ -247,6 +257,18 @@ div.stButton>button[kind="secondary"]{{background:transparent}}
 .stTabs [data-baseweb="tab-highlight"]{{background:{ACC};height:3px}}
 .stTabs [data-baseweb="tab-panel"]{{padding-top:30px}}
 
+@media print{{
+ .stApp{{background:#FFFFFF!important}}
+ .block-container{{padding:0!important;max-width:100%!important}}
+ .cab{{background:#FFFFFF!important;color:#000!important;margin:0 0 12px;
+  padding:0 0 10px;border-bottom:2px solid #000}}
+ .wm,.cab .sub,.tag{{color:#000!important}}
+ div.stButton,[data-testid="stFileUploader"],[data-testid="stExpander"],
+ .navlinea,iframe,[data-testid="stDownloadButton"]{{display:none!important}}
+ .figura{{font-size:2.4rem!important}}
+ h2.sec{{page-break-after:avoid}} .sep{{margin:16px 0}}
+ table.tb td,table.tb th,.nota,.kpi .k{{color:#000!important}}
+}}
 @media(prefers-reduced-motion:reduce){{*{{animation:none!important;transition:none!important}}}}
 @media(min-width:1500px){{.figura{{font-size:{4.1*FS}rem}}}}
 @media(max-width:1100px){{.figura{{font-size:{2.9*FS}rem}}}}
@@ -264,6 +286,8 @@ st.markdown('', unsafe_allow_html=True)
 
 # ─────────────────────────── datos del inmueble ───────────────────────
 PAGINAS = [("valorar", "Valorar"), ("comparar", "Comparar barrios"),
+           ("lote", "Varias a la vez"),
+           ("similares", "Viviendas parecidas"),
            ("fiabilidad", "Fiabilidad"), ("metodo", "Cómo funciona")]
 if "pagina" not in st.session_state:
     st.session_state.pagina = "inicio"
@@ -343,19 +367,23 @@ st.markdown('<h2 class="sec">Datos de la vivienda</h2>'
             'actualiza al instante.</p>', unsafe_allow_html=True)
 
 c0, c1, c2, c3, c4 = st.columns([1.1, 1.5, 1, 1, 1])
-ciudad = c0.selectbox("Ciudad", CIUDADES)
+_ci = _qs("c", "Madrid")
+ciudad = c0.selectbox("Ciudad", CIUDADES,
+                      index=CIUDADES.index(_ci) if _ci in CIUDADES else 0)
 meta, mods, cen = cargar(ciudad)
 meta = aplicar_indice(meta, ciudad)
 dis_ok = [d for d, v in meta["distritos"].items() if v["n"] >= 120]
 nivel = {d: meta["distritos"][d]["e2026"] or meta["nivel_ciudad_2026"] for d in dis_ok}
 dis_ok = sorted(dis_ok, key=lambda d: -nivel[d])
-distrito = c1.selectbox("Barrio o distrito", dis_ok)
-area = c2.number_input("Metros cuadrados", 25, 600, 90, 5)
-rooms = c3.number_input("Habitaciones", 0, 15, 3)
-baths = c4.number_input("Baños", 0, 10, 2)
+_db = _qs("b", None)
+distrito = c1.selectbox("Barrio o distrito", dis_ok,
+                        index=dis_ok.index(_db) if _db in dis_ok else 0)
+area = c2.number_input("Metros cuadrados", 25, 600, int(_qs("m", 90)), 5)
+rooms = c3.number_input("Habitaciones", 0, 15, int(_qs("h", 3)))
+baths = c4.number_input("Baños", 0, 10, int(_qs("ba", 2)))
 
 c5, c6, c7 = st.columns([1, 2, 1.6])
-year = c5.number_input("Año de construcción", 1900, 2018, 1970)
+year = c5.number_input("Año de construcción", 1900, 2018, int(_qs("a", 1970)))
 DOT = ["Ascensor", "Terraza", "Plaza de garaje", "Climatización", "Piscina", "Portería"]
 dots = c6.multiselect("Qué tiene la vivienda", DOT, default=["Ascensor"])
 d_metro = c7.slider("Minutos andando al metro (km)", 0.0, 5.0, 0.3, 0.05)
@@ -434,6 +462,8 @@ tabO = _Seccion(PAG == "valorar")
 tabZ = _Seccion(PAG == "comparar")
 tabM = _Seccion(PAG == "fiabilidad")
 tabD = _Seccion(PAG == "metodo")
+tabL = _Seccion(PAG == "lote")
+tabS = _Seccion(PAG == "similares")
 
 
 # ───────────────────────────── mapa ───────────────────────────────────
@@ -769,6 +799,110 @@ map.on('mouseout',function(){tt.style.display='none';});
                           f"Precio según distancia al metro. Alejarse a 3 kilómetros resta "
                           f"un {cai:.0f} por ciento."), unsafe_allow_html=True)
 
+
+if tabV.activa:
+    st.markdown('<div class="sep"></div>'
+                '<h2 class="sec">De dónde sale este precio</h2>'
+                '<p class="sub">Cuánto suma o resta cada característica frente a una '
+                'vivienda corriente del mismo barrio.</p>', unsafe_allow_html=True)
+
+    # XGBoost calcula la aportación exacta de cada variable (mismo fundamento que SHAP)
+    _cb = mods["q50"].predict(
+        xgb.DMatrix(pd.DataFrame(f0)[FEAT].astype(float)), pred_contribs=True)[0]
+    _NOM = {"CONSTRUCTEDAREA": "Superficie", "LATITUDE": "Ubicación (norte-sur)",
+            "LONGITUDE": "Ubicación (este-oeste)",
+            "DISTANCE_TO_CITY_CENTER": "Cercanía al centro",
+            "DISTANCE_TO_METRO": "Cercanía al metro", "BATHNUMBER": "Número de baños",
+            "ROOMNUMBER": "Habitaciones", "HASLIFT": "Ascensor",
+            "CADCONSTRUCTIONYEAR": "Año de construcción", "BUILDING_AGE": "Antigüedad",
+            "AREA_PER_ROOM": "Amplitud por habitación",
+            "CADASTRALQUALITYID": "Calidad de la construcción",
+            "FLOORCLEAN": "Planta", "AMENITIES_COUNT": "Equipamiento",
+            "HASTERRACE": "Terraza", "HASPARKINGSPACE": "Plaza de garaje",
+            "HASSWIMMINGPOOL": "Piscina", "HASDOORMAN": "Portería",
+            "HASAIRCONDITIONING": "Climatización",
+            "CADMAXBUILDINGFLOOR": "Altura del edificio",
+            "CADDWELLINGCOUNT": "Viviendas del edificio",
+            "DISTANCE_TO_CASTELLANA": "Cercanía a la Castellana",
+            "PERIOD": "Momento del anuncio",
+            "FLOOR_RATIO": "Posición en el edificio",
+            "SalaryPerYear": "Renta de la zona"}
+    _ef = []
+    for _k, _f in enumerate(FEAT):
+        if _k >= len(_cb) - 1:
+            break
+        _c = float(_cb[_k])
+        if abs(_c) < 0.004:
+            continue
+        _ef.append((_NOM.get(_f, _f.replace("_", " ").capitalize()),
+                    p50 - p50 * math.exp(-_c)))
+    _ef.sort(key=lambda x: -abs(x[1]))
+    _ef = _ef[:9]
+
+    if _ef:
+        _mx = max(abs(v) for _, v in _ef)
+        _H = len(_ef) * 30
+        _filas = ""
+        for _i, (_n, _v) in enumerate(_ef):
+            _y = _i * 30
+            _w = abs(_v) / _mx * 150
+            _x = 250 if _v >= 0 else 250 - _w
+            _col = ACC if _v >= 0 else "#A33A22"
+            _filas += (f'<text x="0" y="{_y+14}" fill="{INK}" font-size="12.5" '
+                       f'font-family="Instrument Sans,sans-serif">{_n}</text>'
+                       f'<rect x="{_x:.0f}" y="{_y+3}" width="{_w:.0f}" height="13" '
+                       f'fill="{_col}" opacity="0.85" rx="1"/>'
+                       f'<text x="{(_x+_w+8) if _v>=0 else (_x-8):.0f}" y="{_y+14}" '
+                       f'fill="{_col}" font-size="11.5" '
+                       f'text-anchor="{"start" if _v>=0 else "end"}" '
+                       f'font-family="IBM Plex Mono,monospace">'
+                       f'{"+" if _v>=0 else "−"}{eur(abs(_v))}</text>'
+                       f'<line x1="0" y1="{_y+23}" x2="560" y2="{_y+23}" '
+                       f'stroke="{LINE}" opacity=".55"/>')
+        st.markdown(
+            f'<svg viewBox="0 0 560 {_H}" width="100%" role="img" '
+            f'aria-label="Desglose: '
+            f'{"; ".join(f"{n} {'"'"'suma'"'"' if v>=0 else '"'"'resta'"'"'} {eur(abs(v))}" for n, v in _ef)}." '
+            f'style="display:block;max-width:640px">'
+            f'<line x1="250" y1="0" x2="250" y2="{_H-8}" stroke="{INK}" '
+            f'opacity=".3" stroke-dasharray="2 3"/>{_filas}</svg>'
+            f'<div class="nota" style="margin-top:10px;max-width:70ch">Verde suma, rojo '
+            f'resta. Los valores salen de descomponer la predicción del propio modelo, '
+            f'no de una estimación aparte.</div>', unsafe_allow_html=True)
+
+    # ── Comparación con el método simple ──────────────────────────────
+    _niv = meta["distritos"][distrito]["e2026"] or meta["nivel_ciudad_2026"]
+    _simple = _niv * area
+    _dif = (p50 - _simple) / _simple * 100
+    st.markdown(
+        f'<div class="sep"></div>'
+        f'<h2 class="sec">¿Aporta algo el modelo?</h2>'
+        f'<p class="sub">Lo comparamos con la regla de andar por casa: precio medio del '
+        f'barrio multiplicado por los metros.</p>'
+        f'<div class="kpi">'
+        f'<div><div class="v">{eur(_simple)}</div>'
+        f'<div class="k">regla simple · {eur(_niv)}/m² × {num(area)} m²</div></div>'
+        f'<div><div class="v">{eur(p50)}</div>'
+        f'<div class="k">modelo, con las características de esta vivienda</div></div>'
+        f'<div><div class="v" style="color:{ACC}">{"+" if _dif>=0 else ""}{_dif:.0f} %</div>'
+        f'<div class="k">de diferencia</div></div></div>'
+        f'<div class="nota" style="margin-top:12px;max-width:70ch">La regla simple trata '
+        f'igual a todos los pisos del barrio. El modelo distingue baños, ascensor, planta, '
+        f'antigüedad y distancia al metro, y por eso acierta un '
+        f'{meta["r2_bloques"]*100:.0f} % de la variación de precios.</div>',
+        unsafe_allow_html=True)
+
+    # ── Enlace compartible ────────────────────────────────────────────
+    _p = {"c": ciudad, "b": distrito, "m": str(area), "h": str(rooms),
+          "ba": str(baths), "a": str(year)}
+    st.markdown('<div class="sep"></div>', unsafe_allow_html=True)
+    if st.button("Guardar esta valoración en la dirección web", key="share"):
+        st.query_params.update(_p)
+        st.rerun()
+    st.markdown('<div class="nota" style="margin-top:8px">Al pulsarlo, la dirección del '
+                'navegador guarda estos datos: cópiala y quien la abra verá exactamente '
+                'esta valoración.</div>', unsafe_allow_html=True)
+
 # ─────────────────────── pestaña · ¿es buen precio? ───────────────────
 if tabO.activa:
     st.markdown('<div class="sep"></div>'
@@ -864,6 +998,149 @@ if tabZ.activa:
         + ('<div class="nota" style="margin-top:8px">* Sin nivel publicado propio.</div>'
            if any(e for _, _, e in rank) else ''), unsafe_allow_html=True)
 
+
+if tabL.activa:
+    st.markdown('<h2 class="sec">Valorar varias viviendas de golpe</h2>'
+                '<p class="sub">Sube un archivo CSV y te devolvemos todas valoradas, '
+                'señalando las que se ofrecen por debajo de lo que deberían costar.</p>',
+                unsafe_allow_html=True)
+    _cols = ["distrito", "m2", "habitaciones", "banos", "anio", "precio_pedido"]
+    _ej = pd.DataFrame({"distrito": [dis_ok[0], dis_ok[min(1, len(dis_ok)-1)]],
+                        "m2": [90, 65], "habitaciones": [3, 2], "banos": [2, 1],
+                        "anio": [1970, 1995], "precio_pedido": [800000, 350000]})
+    e1, e2 = st.columns([1, 1.3], gap="large")
+    with e1:
+        st.markdown('<div class="nota">El archivo necesita estas columnas:</div>',
+                    unsafe_allow_html=True)
+        st.markdown(f'<div class="m" style="font-size:.82rem;color:{INK};'
+                    f'background:{SOFT};padding:10px 13px;border-radius:4px;'
+                    f'margin:10px 0">{", ".join(_cols)}</div>', unsafe_allow_html=True)
+        st.download_button("Descargar plantilla de ejemplo",
+                           _ej.to_csv(index=False).encode("utf-8"),
+                           "plantilla_aldaba.csv", "text/csv")
+    with e2:
+        _up = st.file_uploader("Sube tu archivo CSV", type=["csv"])
+
+    if _up is not None:
+        try:
+            _t = pd.read_csv(_up)
+            _falta = [c for c in _cols[:5] if c not in _t.columns]
+            if _falta:
+                st.markdown(f'<div class="aviso">Faltan columnas: '
+                            f'<b>{", ".join(_falta)}</b>.</div>', unsafe_allow_html=True)
+            else:
+                _t = _t.head(300).copy()
+                _rows, _facs = [], []
+                for _, r in _t.iterrows():
+                    _d = str(r["distrito"]) if str(r["distrito"]) in meta["distritos"] \
+                         else distrito
+                    _s = cen[cen.distrito == _d]
+                    _la = float(_s.lat.mean()) if len(_s) else meta["centro"]["lat"]
+                    _lo = float(_s.lon.mean()) if len(_s) else meta["centro"]["lon"]
+                    _rr = dict(meta["medianas"])
+                    _rr.update({"CONSTRUCTEDAREA": float(r["m2"]),
+                                "ROOMNUMBER": float(r["habitaciones"]),
+                                "BATHNUMBER": float(r["banos"]),
+                                "CADCONSTRUCTIONYEAR": float(r["anio"]),
+                                "CONSTRUCTIONYEAR": float(r["anio"]),
+                                "LATITUDE": _la, "LONGITUDE": _lo,
+                                "DISTANCE_TO_METRO": 0.4, "HASLIFT": 1,
+                                "DISTANCE_TO_CITY_CENTER": float(np.sqrt(
+                                    ((_la - clat) * KM) ** 2 +
+                                    ((_lo - clon) * KM *
+                                     math.cos(math.radians(clat))) ** 2)),
+                                "PERIOD": 201812})
+                    _rows.append({c: _rr.get(c, 0.0) for c in FEAT})
+                    _facs.append(meta["distritos"].get(_d, {}).get(
+                        "factor", meta["factor_ciudad"]))
+                _X = xgb.DMatrix(pd.DataFrame(_rows)[FEAT].astype(float))
+                _fa = np.array(_facs)
+                _ar = _t["m2"].astype(float).values
+                _e50 = np.exp(mods["q50"].predict(_X)) * _fa * _ar
+                _e10 = np.exp(mods["q10"].predict(_X)) * _fa * _ar
+                _e90 = np.exp(mods["q90"].predict(_X)) * _fa * _ar
+                _e10 = np.minimum(_e10, _e50); _e90 = np.maximum(_e90, _e50)
+                _t["valoracion"] = _e50.round(0).astype(int)
+                _t["minimo"] = _e10.round(0).astype(int)
+                _t["maximo"] = _e90.round(0).astype(int)
+                if "precio_pedido" in _t.columns:
+                    _pp = pd.to_numeric(_t["precio_pedido"], errors="coerce")
+                    _t["veredicto"] = np.where(_pp < _e10, "Está barata",
+                                       np.where(_pp > _e90, "Está cara", "Precio normal"))
+                    _t["margen"] = (_e50 - _pp).round(0)
+                    _n_op = int((_t["veredicto"] == "Está barata").sum())
+                    st.markdown(
+                        f'<div class="kpi" style="margin-top:24px">'
+                        f'<div><div class="v">{len(_t)}</div>'
+                        f'<div class="k">viviendas valoradas</div></div>'
+                        f'<div><div class="v" style="color:{VERDE}">{_n_op}</div>'
+                        f'<div class="k">por debajo de su banda</div></div>'
+                        f'<div><div class="v">{eur(_e50.sum())}</div>'
+                        f'<div class="k">valor total de la cartera</div></div></div>',
+                        unsafe_allow_html=True)
+                    _t = _t.sort_values("margen", ascending=False)
+                st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+                st.dataframe(_t, use_container_width=True, hide_index=True)
+                st.download_button("Descargar resultados",
+                                   _t.to_csv(index=False).encode("utf-8"),
+                                   "valoraciones_aldaba.csv", "text/csv")
+        except Exception as _e:
+            st.markdown(f'<div class="aviso">No he podido leer el archivo: {_e}</div>',
+                        unsafe_allow_html=True)
+
+
+if tabS.activa:
+    st.markdown('<h2 class="sec">Viviendas reales parecidas a la tuya</h2>'
+                '<p class="sub">Anuncios del conjunto de datos con características '
+                'similares, con su precio real reindexado a hoy. Sirve para contrastar '
+                'que la estimación no se ha inventado nada.</p>', unsafe_allow_html=True)
+    _CP = extra("comparables.json").get(ciudad, [])
+    if not _CP:
+        st.markdown('<div class="aviso">Todavía no hay muestra de comparables cargada '
+                    'para esta ciudad.</div>', unsafe_allow_html=True)
+    else:
+        _c = pd.DataFrame(_CP)
+        # distancia en características, normalizada
+        _z = np.sqrt(((_c["m2"] - area) / 45) ** 2 + ((_c["hab"] - rooms) / 1.4) ** 2 +
+                     ((_c["ban"] - baths) / 1.0) ** 2 +
+                     ((_c["anio"] - year) / 30) ** 2 +
+                     (((_c["d"] != distrito).astype(float)) * 2.2) ** 2)
+        _c = _c.assign(_z=_z).nsmallest(8, "_z")
+        _fac = {d: (meta["distritos"].get(d, {}) or {}).get("factor",
+                    meta["factor_ciudad"]) for d in _c["d"].unique()}
+        _c["hoy"] = [int(p * _fac.get(d, meta["factor_ciudad"]))
+                     for p, d in zip(_c["precio"], _c["d"])]
+        _fil = "".join(
+            f'<tr><td>{r["d"]}</td><td class="m">{num(r["m2"])} m²</td>'
+            f'<td class="m">{num(r["hab"])}</td>'
+            f'<td class="m">{num(r["ban"])}</td>'
+            f'<td class="m">{num(r["anio"])}</td>'
+            f'<td class="m">{eur(r["precio"])}</td>'
+            f'<td class="m" style="color:{ACC}">{eur(r["hoy"])}</td></tr>'
+            for _, r in _c.iterrows())
+        st.markdown(
+            f'<table class="tb"><caption>Ordenadas por parecido con la vivienda que has '
+            f'descrito: {num(area)} m², {rooms} hab., {baths} baños, {year}, '
+            f'{distrito}.</caption>'
+            f'<tr><th>Barrio</th><th>Superficie</th><th>Hab.</th><th>Baños</th>'
+            f'<th>Año</th><th>Precio 2018</th><th>Equivalente hoy</th></tr>{_fil}</table>',
+            unsafe_allow_html=True)
+        _med = float(_c["hoy"].median())
+        _dd = (p50 - _med) / _med * 100
+        st.markdown(
+            f'<div class="kpi" style="margin-top:26px">'
+            f'<div><div class="v">{eur(_med)}</div>'
+            f'<div class="k">precio típico de estas ocho, a día de hoy</div></div>'
+            f'<div><div class="v">{eur(p50)}</div>'
+            f'<div class="k">lo que estima el modelo para la tuya</div></div>'
+            f'<div><div class="v" style="color:{ACC}">'
+            f'{"+" if _dd>=0 else ""}{_dd:.0f} %</div>'
+            f'<div class="k">de diferencia</div></div></div>'
+            f'<div class="nota" style="margin-top:12px;max-width:72ch">Los precios de 2018 '
+            f'se reindexan con el factor del barrio, el mismo que usa la valoración. Una '
+            f'diferencia grande no significa error: tu vivienda puede tener ascensor, '
+            f'terraza o mejor planta que estas.</div>', unsafe_allow_html=True)
+
 # ─────────────────────── pestaña · fiabilidad ─────────────────────────
 if tabM.activa:
     R = resumen()
@@ -888,6 +1165,25 @@ if tabM.activa:
         f'<div class="k">viviendas reales analizadas en {ciudad}</div></div></div>',
         unsafe_allow_html=True)
 
+    _TODOS = extra("error_distrito.json").get(ciudad, {})
+    _ED = _TODOS.get(distrito)
+    if _ED:
+        _ord = sorted(_TODOS.items(), key=lambda x: x[1]["pct"])
+        _pos = [k for k, _ in _ord].index(distrito) + 1
+        _tot = len(_ord)
+        if _pos <= _tot / 3:
+            _cal = "de los más fiables"
+        elif _pos > 2 * _tot / 3:
+            _cal = "de los menos fiables"
+        else:
+            _cal = "en la media"
+        st.markdown(
+            f'<div class="aviso" style="margin-top:22px">'
+            f'<b>En {distrito} concretamente:</b> el error típico es del '
+            f'<b>{_ED["pct"]:.0f} %</b>, unos {eur(_ED["mae"])} de media. '
+            f'Es el barrio número {_pos} de {_tot} en precisión, {_cal}. '
+            f'Calculado sobre {num(_ED["n"])} viviendas reales del barrio.</div>',
+            unsafe_allow_html=True)
     st.markdown("<div style='height:34px'></div>", unsafe_allow_html=True)
     m1, m2 = st.columns([1.15, 1], gap="large")
     with m1:
