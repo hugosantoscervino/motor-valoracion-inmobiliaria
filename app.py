@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 import xgboost as xgb
 import pydeck as pdk
 from PIL import Image
@@ -570,20 +571,14 @@ if tabV.activa:
                'así que usamos la media de la ciudad.</div>' if ESTIMADO else ''),
             unsafe_allow_html=True)
     with a2:
-        # ── Mapa: ISOBANDAS rellenas sobre callejero, con precio al pasar el cursor
-        # La extensión se ajusta a la de los datos reales: fuera de ahí el modelo
-        # extrapolaría sin fundamento.
-        _mla = (cen.lat.max() - cen.lat.min()) * 0.08
-        _mlo = (cen.lon.max() - cen.lon.min()) * 0.08
+        # ── Mapa: Leaflet incrustado. La superficie va como imagen que el navegador
+        #    interpola (suave, sin celdas) y el precio se lee de la malla en JS.
+        _mla = (cen.lat.max() - cen.lat.min()) * 0.06
+        _mlo = (cen.lon.max() - cen.lon.min()) * 0.06
         _laA, _laB = cen.lat.min() - _mla, cen.lat.max() + _mla
         _loA, _loB = cen.lon.min() - _mlo, cen.lon.max() + _mlo
-        _mlat, _mlon = (_laA + _laB) / 2, (_loA + _loB) / 2
 
-        _ancho_km = (_loB - _loA) * KM * math.cos(math.radians(clat))
-        _alto_km  = (_laB - _laA) * KM
-        _SEP_KM = 0.28                      # separación entre puntos de la malla
-        _NX2 = max(30, int(_ancho_km / _SEP_KM))
-        _NY2 = max(30, int(_alto_km  / _SEP_KM))
+        _NY2, _NX2 = 90, 86
         _LA2, _LO2 = np.meshgrid(np.linspace(_laB, _laA, _NY2),
                                  np.linspace(_loA, _loB, _NX2), indexing="ij")
         _b2 = dict(meta["medianas"])
@@ -608,72 +603,97 @@ if tabV.activa:
         _lo2 = float(np.percentile(_Z2, 2))
         _hi2 = float(np.percentile(_Z2, 98))
 
-        # Isobandas: threshold como [min, max] rellena; como número solo traza líneas.
-        _N = 7
-        _bd = [_lo2 + (_hi2 - _lo2) * k / _N for k in range(_N + 1)]
-        _bd[0], _bd[-1] = 0.0, _hi2 * 3      # extremos abiertos: sin huecos sin color
-        _cols = [[214, 228, 219, 150], [178, 209, 192, 175], [142, 190, 166, 195],
-                 [104, 168, 140, 212], [68, 142, 113, 226], [36, 110, 86, 238],
-                 [11, 77, 61, 248]]
-        _contours = [{"threshold": [int(_bd[k]), int(_bd[k + 1])], "color": _cols[k]}
-                     for k in range(_N)]
+        # Imagen RGBA de la superficie, ampliada con interpolación bicúbica
+        _t = np.clip((_Z2 - _lo2) / max(_hi2 - _lo2, 1e-9), 0, 1) ** 0.85
+        _stops = [(0.00, (240, 246, 242)), (0.22, (198, 224, 208)),
+                  (0.45, (140, 192, 164)), (0.68, (82, 152, 122)),
+                  (0.86, (36, 112, 88)), (1.00, (8, 70, 55))]
+        _ps = np.array([p[0] for p in _stops])
+        _rgba = np.zeros(_t.shape + (4,), np.uint8)
+        for _k in range(3):
+            _rgba[..., _k] = np.clip(
+                np.interp(_t, _ps, [p[1][_k] for p in _stops]), 0, 255)
+        _rgba[..., 3] = (np.clip(0.18 + 0.62 * _t, 0, 1) * 255).astype(np.uint8)
+        _img = Image.fromarray(_rgba, "RGBA").resize(
+            (_NX2 * 9, _NY2 * 9), Image.BICUBIC)
+        _buf = BytesIO(); _img.save(_buf, "PNG", optimize=True)
+        _uri = "data:image/png;base64," + base64.b64encode(_buf.getvalue()).decode()
 
-        _pts = [{"lat": float(_LA2[j, i]), "lon": float(_LO2[j, i]),
-                 "precio": int(_Z2[j, i])}
-                for j in range(_NY2) for i in range(_NX2)]
-
-        # La celda triplica la separación: cada celda recoge ~9 puntos y no quedan huecos
-        _sep = int(_SEP_KM * 3 * 1000)
-        _capa_contorno = pdk.Layer(
-            "ContourLayer", data=_pts,
-            get_position="[lon, lat]", get_weight="precio",
-            contours=_contours, cell_size=_sep, pickable=False)
-        # pydeck convierte los argumentos de texto en accesores (@@=MEAN),
-        # así que la agregación se asigna después de construir la capa.
-        _capa_contorno.aggregation = "MEAN"
-
+        _precios = [[int(_Z2[j, i]) for i in range(_NX2)] for j in range(_NY2)]
         _rank_m = por_distrito(ciudad, area, rooms, baths, year, d_metro, ext)
-        _labs = [{"lon": float(cen[cen.distrito == d].lon.mean()),
-                  "lat": float(cen[cen.distrito == d].lat.mean()), "t": d}
-                 for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
+        _marcas = [{"lat": float(cen[cen.distrito == d].lat.mean()),
+                    "lon": float(cen[cen.distrito == d].lon.mean()), "t": d}
+                   for d, _, _ in _rank_m[:13] if len(cen[cen.distrito == d])]
 
-        _capas = [
-            _capa_contorno,
-            # Capa invisible que aporta el precio exacto al pasar el cursor
-            pdk.Layer("ScatterplotLayer", data=_pts,
-                      get_position="[lon, lat]", get_radius=int(_SEP_KM * 1000 * 0.7),
-                      get_fill_color=[0, 0, 0, 1], pickable=True,
-                      radius_min_pixels=5),
-            pdk.Layer("TextLayer", data=_labs,
-                      get_position="[lon, lat]", get_text="t",
-                      get_size=13, get_color=[26, 29, 27],
-                      font_family="'Instrument Sans', sans-serif",
-                      character_set="auto", font_settings={"sdf": True},
-                      get_alignment_baseline="'center'",
-                      outline_width=4, outline_color=[255, 255, 255]),
-            pdk.Layer("ScatterplotLayer", data=[{"lon": lon0, "lat": lat0}],
-                      get_position="[lon, lat]", get_radius=150,
-                      get_fill_color=[26, 29, 27], get_line_color=[255, 255, 255],
-                      line_width_min_pixels=3, stroked=True, radius_min_pixels=9),
-        ]
-        _deck = pdk.Deck(layers=_capas,
-                         initial_view_state=pdk.ViewState(
-                             latitude=_mlat, longitude=_mlon, zoom=11.0),
-                         map_style="light")
-        _deck.tooltip = {"text": "Precio estimado aquí\n{precio} €"}
-        st.pydeck_chart(_deck, height=520)
+        _html = """
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+ html,body{margin:0;padding:0;background:__BG__}
+ #m{width:100%;height:__H__px;border:1px solid __LINE__;border-radius:4px}
+ .leaflet-container{background:__BG__;font-family:'Instrument Sans',sans-serif}
+ #tt{position:absolute;z-index:1000;pointer-events:none;display:none;
+     background:#FFFFFF;border:1px solid __LINE__;border-radius:4px;
+     padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+     color:__INK__;box-shadow:0 2px 10px rgba(0,0,0,.13);white-space:nowrap}
+ #tt b{font-size:14px}
+ .bq{background:rgba(255,255,255,.82);border:none;border-radius:3px;
+     padding:1px 5px;font-size:11px;font-weight:500;color:__INK__;
+     box-shadow:none;white-space:nowrap}
+ .bq:before{display:none}
+</style>
+<div style="position:relative"><div id="m"></div><div id="tt"></div></div>
+<script>
+const LA_A=__LAA__, LA_B=__LAB__, LO_A=__LOA__, LO_B=__LOB__;
+const NY=__NY__, NX=__NX__, P=__PRECIOS__, MARCAS=__MARCAS__;
+const map=L.map('m',{zoomControl:true,attributionControl:true})
+  .fitBounds([[LA_A,LO_A],[LA_B,LO_B]]);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  {maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+L.imageOverlay('__URI__',[[LA_A,LO_A],[LA_B,LO_B]],{opacity:1,interactive:false})
+  .addTo(map);
+MARCAS.forEach(function(d){
+  L.marker([d.lat,d.lon],{opacity:0,interactive:false})
+   .bindTooltip(d.t,{permanent:true,direction:'center',className:'bq'}).addTo(map);
+});
+L.circleMarker([__PLAT__,__PLON__],{radius:8,color:'#FFFFFF',weight:3,
+  fillColor:'__INK__',fillOpacity:1}).addTo(map);
+const tt=document.getElementById('tt');
+map.on('mousemove',function(e){
+  const la=e.latlng.lat, lo=e.latlng.lng;
+  if(la<LA_A||la>LA_B||lo<LO_A||lo>LO_B){tt.style.display='none';return;}
+  const j=Math.min(NY-1,Math.max(0,Math.round((LA_B-la)/(LA_B-LA_A)*(NY-1))));
+  const i=Math.min(NX-1,Math.max(0,Math.round((lo-LO_A)/(LO_B-LO_A)*(NX-1))));
+  const v=P[j][i];
+  tt.innerHTML='<b>'+v.toLocaleString('es-ES')+' \u20AC</b><br>este piso aqu\u00ed';
+  tt.style.left=(e.containerPoint.x+16)+'px';
+  tt.style.top=(e.containerPoint.y+16)+'px';
+  tt.style.display='block';
+});
+map.on('mouseout',function(){tt.style.display='none';});
+</script>"""
+        for _k, _v in [("__BG__", BG), ("__LINE__", LINE), ("__INK__", INK),
+                       ("__H__", "500"), ("__LAA__", f"{_laA:.6f}"),
+                       ("__LAB__", f"{_laB:.6f}"), ("__LOA__", f"{_loA:.6f}"),
+                       ("__LOB__", f"{_loB:.6f}"), ("__NY__", str(_NY2)),
+                       ("__NX__", str(_NX2)),
+                       ("__PRECIOS__", json.dumps(_precios)),
+                       ("__MARCAS__", json.dumps(_marcas, ensure_ascii=False)),
+                       ("__URI__", _uri), ("__PLAT__", f"{lat0:.6f}"),
+                       ("__PLON__", f"{lon0:.6f}")]:
+            _html = _html.replace(_k, _v)
+        components.html(_html, height=515, scrolling=False)
 
         st.markdown(
-            f'<figcaption class="nota" style="margin-top:8px">'
+            f'<figcaption class="nota" style="margin-top:10px">'
             f'<b>Qué estás viendo:</b> cuánto costaría <b>este mismo piso</b> en cada '
-            f'punto de {ciudad}. <b>Pasa el cursor</b> para ver el precio de cada zona. '
-            f'El mapa cubre el término municipal, que es donde tenemos datos.'
-            f'</figcaption>'
+            f'punto de {ciudad}. <b>Pasa el cursor</b> por el mapa para ver el precio. '
+            f'Cubre el término municipal, que es donde hay datos.</figcaption>'
             f'<div class="esc"><span>{eur(_lo2)}</span>'
             f'<span class="bar" style="flex:0 0 150px;height:10px;border-radius:2px;'
             f'border:1px solid #CFC8B9;background:linear-gradient(90deg,'
-            f'#D6E4DB,#8EBEA6 50%,#0B4D3D)"></span>'
-            f'<span>{eur(_hi2)}</span><span style="flex:1"></span>'
+            f'#F0F6F2,#C6E0D0 22%,#8CC0A4 45%,#52987A 68%,#247058 86%,#084637)">'
+            f'</span><span>{eur(_hi2)}</span><span style="flex:1"></span>'
             f'<span>barato → caro</span></div>',
             unsafe_allow_html=True)
 
