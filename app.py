@@ -123,7 +123,10 @@ header[data-testid="stHeader"],#MainMenu,footer,[data-testid="stToolbar"],
 [data-testid="collapsedControl"],[data-testid="stSidebarCollapseButton"],
 section[data-testid="stSidebar"]{{display:none!important}}
 .stApp{{background:{BG}}}
-.block-container{{padding:0 3rem 5rem!important;max-width:1600px!important;width:100%!important}}
+.block-container,[data-testid="stMainBlockContainer"],
+section.main>div.block-container{{
+ padding:0 2.6rem 5rem!important;max-width:min(1860px,95vw)!important;
+ width:100%!important}}
 html,body,[class*="css"]{{font-family:'Instrument Sans',sans-serif;color:{INK};
  font-size:{FS}rem}}
 .m{{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
@@ -138,13 +141,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,
 .saltar:focus{{position:static;display:inline-block;background:{ACC};color:#fff;
  padding:8px 14px;margin:8px 0}}
 
-.cab{{background:{BANDA};color:#FFFFFF;margin:0 -3rem 0;padding:30px 3rem 26px;
+.cab{{background:{BANDA};color:#FFFFFF;margin:0 -2.6rem 0;padding:30px 2.6rem 26px;
  display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}}
 .cab-badge{{font-family:'IBM Plex Mono',monospace;font-size:{.66*FS}rem;
  letter-spacing:.14em;text-transform:uppercase;color:{CREMA};opacity:.85}}
 .marca{{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}}
 .tag{{font-size:{.9*FS}rem;color:{CREMA};font-style:italic}}
-.navlinea{{border-bottom:2px solid {LINE};margin:0 -3rem 30px}}
+.navlinea{{border-bottom:2px solid {LINE};margin:0 -2.6rem 30px}}
 .sep{{border-top:1px solid {LINE};margin:46px 0 34px}}
 .pulso{{background:{SOFT};border:1px solid {LINE};border-radius:4px;padding:18px 22px;margin-top:8px}}
 .pulso-t{{font-family:'IBM Plex Mono',monospace;font-size:{.64*FS}rem;letter-spacing:.16em;text-transform:uppercase;color:{MUTE};margin-bottom:14px}}
@@ -293,8 +296,10 @@ div.stButton>button[kind="secondary"]{{background:transparent}}
  table.tb td,table.tb th{{padding:9px 8px 9px 0;white-space:nowrap}}
 }}
 @media(max-width:820px){{
- .block-container{{padding:0 1.1rem 3rem!important}}
+ .block-container,[data-testid="stMainBlockContainer"]{{
+  padding:0 1.1rem 3rem!important;max-width:100%!important}}
  .cab{{margin:0 -1.1rem 24px;padding:20px 1.1rem}}
+ .navlinea{{margin:0 -1.1rem 24px}}
  .figura{{font-size:{2.3*FS}rem;white-space:normal}} .cifras{{gap:18px}}
  .stTabs [data-baseweb="tab-list"]{{gap:16px;overflow-x:auto;scrollbar-width:none}}
 }}
