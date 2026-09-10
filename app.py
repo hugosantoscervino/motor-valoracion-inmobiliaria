@@ -272,6 +272,26 @@ div.stButton>button[kind="secondary"]{{background:transparent}}
 @media(prefers-reduced-motion:reduce){{*{{animation:none!important;transition:none!important}}}}
 @media(min-width:1500px){{.figura{{font-size:{4.1*FS}rem}}}}
 @media(max-width:1100px){{.figura{{font-size:{2.9*FS}rem}}}}
+/* Tablet: las columnas de Streamlit se parten en dos por fila */
+@media(max-width:1000px){{
+ div[data-testid="stHorizontalBlock"]{{flex-wrap:wrap!important;gap:.6rem}}
+ div[data-testid="stHorizontalBlock"]>div[data-testid="stColumn"]{{
+  min-width:47%!important;flex:1 1 47%!important}}
+ table.tb{{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+}}
+/* Móvil: una sola columna y tablas deslizables */
+@media(max-width:700px){{
+ div[data-testid="stHorizontalBlock"]>div[data-testid="stColumn"]{{
+  min-width:100%!important;flex:1 1 100%!important}}
+ .cifras{{gap:14px}} .cifras>div{{flex:1 1 44%}}
+ .kpi>div{{flex:1 1 100%;border-right:none;border-bottom:1px solid {LINE}}}
+ .figura{{font-size:{2.1*FS}rem}}
+ .portada h1{{font-size:{1.7*FS}rem}}
+ .cab{{flex-direction:column;align-items:flex-start;gap:6px}}
+ .wm{{font-size:{1.05*FS}rem;letter-spacing:.28em}}
+ .pie{{flex-direction:column;gap:6px}}
+ table.tb td,table.tb th{{padding:9px 8px 9px 0;white-space:nowrap}}
+}}
 @media(max-width:820px){{
  .block-container{{padding:0 1.1rem 3rem!important}}
  .cab{{margin:0 -1.1rem 24px;padding:20px 1.1rem}}
