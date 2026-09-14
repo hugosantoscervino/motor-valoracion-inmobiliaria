@@ -123,11 +123,14 @@ def resumen():
         return {c: json.loads((ART / f"{c.lower()}_meta.json").read_text(encoding='utf-8'))
                 for c in ['Madrid','Barcelona','Valencia'] if (ART / f"{c.lower()}_meta.json").exists()}
     raw = json.loads(p.read_text(encoding='utf-8'))
-    # resumen.json puede contener los meta completos o solo un subconjunto de claves
     for c in list(raw.keys()):
-        if 'r2_bloques' not in raw[c]:
+        # si el resumen no trae métricas, buscarlas en 'evaluacion' del meta
+        if "r2_bloques" not in raw[c] and "modelo" not in raw[c]:
             mp = ART / f"{c.lower()}_meta.json"
-            if mp.exists(): raw[c] = json.loads(mp.read_text(encoding='utf-8'))
+            if mp.exists():
+                mm = json.loads(mp.read_text(encoding="utf-8"))
+                raw[c] = {**raw[c], **mm.get("evaluacion", {}),
+                          "n_anuncios": mm.get("n_anuncios", 0)}
     return _norm_res(raw)
 
 
@@ -1259,9 +1262,21 @@ if tabM.activa:
     R = resumen()
     # normalizar: si resumen devuelve metas completos, extraer las claves necesarias
     def _stat(d, k, default=0):
-        if k in d: return d[k]
-        if 'r2_bloques' in d and k == 'n_anuncios': return d.get('n_anuncios', default)
+        if not d:
+            return default
+        mo = d.get("modelo", {})
+        if k == "r2_bloques":
+            return d.get("r2_bloques") or mo.get("r2", default)
+        if k == "mae":
+            return d.get("mae") or mo.get("mae_eur", default)
+        if k == "cobertura_intervalo":
+            return (d.get("cobertura_intervalo") or d.get("cobertura_2018", default))
+        if k == "n_anuncios":
+            return (d.get("n_anuncios") or
+                    d.get("n_train", 0) + d.get("n_test", 0) + d.get("n_calibracion", 0)
+                    or default)
         return d.get(k, default)
+
     st.markdown('<h2 class="sec">Hasta qué punto acierta</h2>'
                 '<p class="sub">Medido sobre viviendas que el modelo no había visto nunca, '
                 'apartando barrios enteros para que no pueda copiar de vecinos.</p>',
