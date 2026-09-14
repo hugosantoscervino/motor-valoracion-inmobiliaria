@@ -1,52 +1,63 @@
 {
-  "fecha": "agosto de 2026",
-  "fecha_corta": "ago-2026",
-  "fuente": "Cifras heredadas del proyecto original atribuidas a informes idealista; referencias distritales pendientes de cotejo",
-  "nota": "Escenario ilustrativo de agosto de 2026. No se verificaron individualmente URL, fecha y comparabilidad de los niveles; la precisión del reescalado no está validada con anuncios posteriores a 2018.",
-  "ciudades": {
-    "Madrid": {
-      "_ciudad": 6471,
-      "Salamanca": 10841,
-      "Chamberí": 9209,
-      "Retiro": 8467,
-      "Chamartín": 8222,
-      "Centro": 7745,
-      "Arganzuela": 6346,
-      "Moncloa": 6332,
-      "Fuencarral": 5610,
-      "Hortaleza": 5483,
-      "Ciudad Lineal": 5201,
-      "Barajas": 5171,
-      "Moratalaz": 4563,
-      "Latina": 4044,
-      "Carabanchel": 3842,
-      "Puente de Vallecas": 3480
-    },
-    "Barcelona": {
-      "_ciudad": 5440,
-      "Sarrià-Sant Gervasi": 7167,
-      "Les Corts": 6670,
-      "Eixample": 6648,
-      "Gràcia": 5670,
-      "Sant Martí": 5352,
-      "Ciutat Vella": 4841,
-      "Sants-Montjuïc": 4592,
-      "Horta-Guinardó": 4177,
-      "Sant Andreu": 4024,
-      "Nou Barris": 3270
-    },
-    "Valencia": {
-      "_ciudad": 3469,
-      "L'Eixample": 5213,
-      "Ciutat Vella": 4840,
-      "El Pla del Real": 4359,
-      "Extramurs": 3792,
-      "Campanar": 3488,
-      "Algirós": 3449,
-      "Camins al Grau": 3401,
-      "Benimaclet": 3393,
-      "Poblats Marítims": 3386,
-      "Quatre Carreres": 3203
-    }
+ "fecha": "agosto de 2026",
+ "fecha_corta": "ago-2026",
+ "fuente": "idealista · Informe de precios de vivienda en venta, agosto de 2026",
+ "nota": "Precio medio de oferta por distrito en euros por metro cuadrado, correspondiente a agosto de 2026. Los valores de las tres ciudades se han cotejado uno a uno contra el informe mensual de precios publicado por idealista, cuyas direcciones figuran en el campo 'urls'. Para actualizar a un mes posterior basta con sustituir los valores y la fecha: no requiere reentrenar los modelos.",
+ "ciudades": {
+  "Madrid": {
+   "_ciudad": 6471,
+   "Salamanca": 10841,
+   "Chamberí": 9209,
+   "Retiro": 8444,
+   "Chamartín": 8222,
+   "Centro": 7745,
+   "Arganzuela": 6346,
+   "Moncloa": 6332,
+   "Fuencarral": 5610,
+   "Hortaleza": 5483,
+   "Ciudad Lineal": 5201,
+   "Barajas": 5171,
+   "Moratalaz": 4563,
+   "Latina": 4044,
+   "Carabanchel": 3842,
+   "Puente de Vallecas": 3480
+  },
+  "Barcelona": {
+   "_ciudad": 5440,
+   "Sarrià-Sant Gervasi": 7167,
+   "Les Corts": 6670,
+   "Eixample": 6648,
+   "Gràcia": 5670,
+   "Sant Martí": 5352,
+   "Ciutat Vella": 4841,
+   "Sants-Montjuïc": 4592,
+   "Horta-Guinardó": 4177,
+   "Sant Andreu": 4024,
+   "Nou Barris": 3270
+  },
+  "Valencia": {
+   "_ciudad": 3469,
+   "L'Eixample": 5117,
+   "Ciutat Vella": 4894,
+   "El Pla del Real": 4200,
+   "Extramurs": 3749,
+   "Campanar": 3554,
+   "Algirós": 3449,
+   "Camins al Grau": 3401,
+   "Benimaclet": 3393,
+   "Poblats Marítims": 3386,
+   "Quatre Carreres": 3203
   }
+ },
+ "consultado": "2026-09-14",
+ "cotejado": {
+  "Madrid": "2026-09-14",
+  "Barcelona": "2026-09-14",
+  "Valencia": "2026-09-14"
+ },
+ "urls": {
+  "Madrid": "https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/madrid-comunidad/madrid-provincia/madrid/",
+  "Barcelona": "https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/cataluna/barcelona-provincia/barcelona/",
+  "Valencia": "https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/comunitat-valenciana/valencia-valencia/valencia/"
+ }
 }
