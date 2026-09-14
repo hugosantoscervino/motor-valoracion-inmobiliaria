@@ -49,9 +49,40 @@ NX = int(round(NY * MAPA_W / MAPA_H))
 KM = 111.0
 
 
+def _adaptar(meta):
+    """Traduce los metadatos del formato de validación al que usa la interfaz."""
+    if "medianas" not in meta and "medianas_train" in meta:
+        meta["medianas"] = meta["medianas_train"]
+    ev = meta.get("evaluacion", {})
+    if "r2_bloques" not in meta:
+        meta["r2_bloques"] = ev.get("modelo", {}).get("r2", 0.0)
+        meta["mae"] = ev.get("modelo", {}).get("mae_eur", 0.0)
+        meta["cobertura_intervalo"] = ev.get("cobertura_2018", 0.0)
+    # distritos: media de 2018 por distrito -> factor de reindexación
+    d0 = next(iter(meta["distritos"].values()), {})
+    if "e2018" not in d0:
+        for d, v in meta["distritos"].items():
+            meta["distritos"][d] = {"e2018": v.get("media_2018_eur_m2", 0.0),
+                                    "n": v.get("n_train", 0),
+                                    "e2026": None, "factor": 1.0, "estimado": True}
+    if "unitprice_mediana_2018" not in meta:
+        vals = [v["e2018"] for v in meta["distritos"].values() if v["e2018"]]
+        meta["unitprice_mediana_2018"] = float(np.median(vals)) if vals else 1.0
+    cen = pd.DataFrame(meta["centroides"])
+    if "centro" not in meta:
+        meta["centro"] = {"lat": float(cen.lat.median()),
+                          "lon": float(cen.lon.median())}
+    if "dominio" not in meta:
+        meta["dominio"] = {"area_p99": 320.0}
+    if "n_anuncios" not in meta:
+        meta["n_anuncios"] = meta.get("n_activos", 0)
+    return meta
+
+
 @st.cache_resource(show_spinner=False)
 def cargar(ciudad):
-    meta = json.loads((ART / f"{ciudad.lower()}_meta.json").read_text(encoding="utf-8"))
+    meta = _adaptar(json.loads(
+        (ART / f"{ciudad.lower()}_meta.json").read_text(encoding="utf-8")))
     mods = {q: xgb.Booster(model_file=str(ART / f"{ciudad.lower()}_{q}.ubj"))
             for q in ("q10", "q50", "q90")}
     return meta, mods, pd.DataFrame(meta["centroides"])
@@ -69,6 +100,22 @@ def indice():
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
+def _norm_res(r):
+    """Normaliza el resumen venga en el formato que venga."""
+    out = {}
+    for c, v in r.items():
+        mo = v.get("modelo", {})
+        out[c] = dict(v)
+        out[c]["r2_bloques"] = v.get("r2_bloques", mo.get("r2", 0.0))
+        out[c]["mae"] = v.get("mae", mo.get("mae_eur", 0.0))
+        out[c]["cobertura_intervalo"] = v.get("cobertura_intervalo",
+                                              v.get("cobertura_2018", 0.0))
+        out[c]["n_anuncios"] = v.get("n_anuncios",
+                                     v.get("n_train", 0) + v.get("n_test", 0) +
+                                     v.get("n_calibracion", 0))
+    return out
+
+
 @st.cache_data(show_spinner=False)
 def resumen():
     p = ART / "resumen.json"
@@ -81,7 +128,7 @@ def resumen():
         if 'r2_bloques' not in raw[c]:
             mp = ART / f"{c.lower()}_meta.json"
             if mp.exists(): raw[c] = json.loads(mp.read_text(encoding='utf-8'))
-    return raw
+    return _norm_res(raw)
 
 
 IDX = indice()
@@ -899,27 +946,58 @@ if tabV.activa:
             f'resta. Los valores salen de descomponer la predicción del propio modelo, '
             f'no de una estimación aparte.</div>', unsafe_allow_html=True)
 
-    # ── Comparación con el método simple ──────────────────────────────
-    _niv = meta["distritos"][distrito]["e2026"] or meta["nivel_ciudad_2026"]
-    _simple = _niv * area
-    _dif = (p50 - _simple) / _simple * 100
-    st.markdown(
-        f'<div class="sep"></div>'
-        f'<h2 class="sec">¿Aporta algo el modelo?</h2>'
-        f'<p class="sub">Lo comparamos con la regla de andar por casa: precio medio del '
-        f'barrio multiplicado por los metros.</p>'
-        f'<div class="kpi">'
-        f'<div><div class="v">{eur(_simple)}</div>'
-        f'<div class="k">regla simple · {eur(_niv)}/m² × {num(area)} m²</div></div>'
-        f'<div><div class="v">{eur(p50)}</div>'
-        f'<div class="k">modelo, con las características de esta vivienda</div></div>'
-        f'<div><div class="v" style="color:{ACC}">{"+" if _dif>=0 else ""}{_dif:.0f} %</div>'
-        f'<div class="k">de diferencia</div></div></div>'
-        f'<div class="nota" style="margin-top:12px;max-width:70ch">La regla simple trata '
-        f'igual a todos los pisos del barrio. El modelo distingue baños, ascensor, planta, '
-        f'antigüedad y distancia al metro, y por eso acierta un '
-        f'{meta["r2_bloques"]*100:.0f} % de la variación de precios.</div>',
-        unsafe_allow_html=True)
+    # ── Comparación con referencias, medida sobre el conjunto de prueba ──
+    _EV = meta.get("evaluacion", {})
+    _bc, _bd = _EV.get("baseline_ciudad"), _EV.get("baseline_distrito")
+    _mo = _EV.get("modelo")
+    if _bc and _bd and _mo:
+        _mej = (1 - _mo["mae_eur"] / _bd["mae_eur"]) * 100
+        st.markdown(
+            f'<div class="sep"></div>'
+            f'<h2 class="sec">¿Aporta algo el modelo?</h2>'
+            f'<p class="sub">Comparado con dos reglas sencillas sobre las mismas '
+            f'{num(_mo["n"])} viviendas de prueba que el modelo nunca vio.</p>'
+            f'<table class="tb"><tr><th>Método</th><th>Error medio</th>'
+            f'<th>Error típico</th><th>Acierto</th></tr>'
+            f'<tr><td>Precio medio de la ciudad × metros</td>'
+            f'<td class="m">{eur(_bc["mae_eur"])}</td>'
+            f'<td class="m">{_bc["mediana_error_pct"]:.1f} %</td>'
+            f'<td class="m">{_bc["r2"]*100:.0f} %</td></tr>'
+            f'<tr><td>Precio medio del barrio × metros</td>'
+            f'<td class="m">{eur(_bd["mae_eur"])}</td>'
+            f'<td class="m">{_bd["mediana_error_pct"]:.1f} %</td>'
+            f'<td class="m">{_bd["r2"]*100:.0f} %</td></tr>'
+            f'<tr style="font-weight:600"><td>Aldaba</td>'
+            f'<td class="m" style="color:{ACC}">{eur(_mo["mae_eur"])}</td>'
+            f'<td class="m" style="color:{ACC}">{_mo["mediana_error_pct"]:.1f} %</td>'
+            f'<td class="m" style="color:{ACC}">{_mo["r2"]*100:.0f} %</td></tr></table>'
+            f'<div class="nota" style="margin-top:14px;max-width:72ch">Frente a la regla '
+            f'del barrio, que ya usa la localización, el modelo reduce el error un '
+            f'<b>{_mej:.1f} %</b>. La diferencia sale de distinguir baños, ascensor, '
+            f'planta, antigüedad y distancia al metro dentro de una misma zona.</div>',
+            unsafe_allow_html=True)
+
+    # ── Error real usando solo los campos del formulario ───────────────
+    _sa = _EV.get("simulacion_campos_app")
+    _sl = _EV.get("ablacion_sin_localizacion")
+    if _sa and _mo:
+        _pe = (_sa["mae_eur"] / _mo["mae_eur"] - 1) * 100
+        st.markdown(
+            f'<div class="sep"></div>'
+            f'<h2 class="sec">El error real de esta web</h2>'
+            f'<p class="sub">El modelo entrenado usa 39 variables, pero el formulario '
+            f'solo pregunta unas pocas. Esto mide cuánto se pierde por ello.</p>'
+            f'<div class="kpi">'
+            f'<div><div class="v">{eur(_mo["mae_eur"])}</div>'
+            f'<div class="k">error con todas las variables</div></div>'
+            f'<div><div class="v" style="color:{ACC}">{eur(_sa["mae_eur"])}</div>'
+            f'<div class="k">error con solo lo que pide el formulario</div></div>'
+            f'<div><div class="v">{eur(_sl["mae_eur"]) if _sl else "—"}</div>'
+            f'<div class="k">error si no supiéramos dónde está</div></div></div>'
+            f'<div class="nota" style="margin-top:14px;max-width:72ch">Rellenar solo el '
+            f'formulario empeora la estimación un <b>{_pe:.0f} %</b>. Por eso merece la '
+            f'pena meter las coordenadas exactas del portal: la ubicación es, con '
+            f'diferencia, lo que más pesa.</div>', unsafe_allow_html=True)
 
     # ── Enlace compartible ────────────────────────────────────────────
     _p = {"c": ciudad, "b": distrito, "m": str(area), "h": str(rooms),
@@ -1123,7 +1201,13 @@ if tabS.activa:
                 '<p class="sub">Anuncios del conjunto de datos con características '
                 'similares, con su precio real reindexado a hoy. Sirve para contrastar '
                 'que la estimación no se ha inventado nada.</p>', unsafe_allow_html=True)
-    _CP = extra("comparables.json").get(ciudad, [])
+    _CP = (extra(f"{ciudad.lower()}_comparables.json")
+           or extra("comparables.json").get(ciudad, []))
+    if _CP and "DISTRITO" in _CP[0]:
+        _CP = [{"d": x["DISTRITO"], "m2": x["CONSTRUCTEDAREA"],
+                "hab": x["ROOMNUMBER"], "ban": x["BATHNUMBER"],
+                "anio": x["CADCONSTRUCTIONYEAR"],
+                "precio": x["precio_2018_eur"]} for x in _CP]
     if not _CP:
         st.markdown('<div class="aviso">Todavía no hay muestra de comparables cargada '
                     'para esta ciudad.</div>', unsafe_allow_html=True)
@@ -1194,10 +1278,11 @@ if tabM.activa:
         f'<div class="k">viviendas reales analizadas en {ciudad}</div></div></div>',
         unsafe_allow_html=True)
 
-    _TODOS = extra("error_distrito.json").get(ciudad, {})
+    _TODOS = (extra(f"{ciudad.lower()}_error_distrito.json")
+              or extra("error_distrito.json").get(ciudad, {}))
     _ED = _TODOS.get(distrito)
     if _ED:
-        _ord = sorted(_TODOS.items(), key=lambda x: x[1]["pct"])
+        _ord = sorted(_TODOS.items(), key=lambda x: x[1].get("pct", x[1].get("mediana_error_pct", 99)))
         _pos = [k for k, _ in _ord].index(distrito) + 1
         _tot = len(_ord)
         if _pos <= _tot / 3:
@@ -1209,7 +1294,7 @@ if tabM.activa:
         st.markdown(
             f'<div class="aviso" style="margin-top:22px">'
             f'<b>En {distrito} concretamente:</b> el error típico es del '
-            f'<b>{_ED["pct"]:.0f} %</b>, unos {eur(_ED["mae"])} de media. '
+            f'<b>{_ED.get("pct", _ED.get("mediana_error_pct", 0)):.0f} %</b>, unos {eur(_ED.get("mae", _ED.get("mae_eur", 0)))} de media. '
             f'Es el barrio número {_pos} de {_tot} en precisión, {_cal}. '
             f'Calculado sobre {num(_ED["n"])} viviendas reales del barrio.</div>',
             unsafe_allow_html=True)
@@ -1302,7 +1387,7 @@ if tabD.activa:
 <b>Conjunto de datos.</b> <i>idealista18</i> — Rey-Blanco, Arbués, López y Páez (2024),
 <i>Environment and Planning B: Urban Analytics and City Science</i>,
 DOI 10.1177/23998083241242844, licencia ODbL. {num(meta['n_anuncios'])} anuncios de
-{ciudad} ({num(meta['n_viviendas'])} viviendas únicas) de los cuatro trimestres de 2018.<br><br>
+{ciudad} ({num(meta.get('n_viviendas', meta.get('n_activos', 0)))} viviendas únicas) de los cuatro trimestres de 2018.<br><br>
 <b>Modelo.</b> Árboles con refuerzo de gradiente sobre el logaritmo del precio por metro
 cuadrado, con restricciones de monotonía en las variables de signo inequívoco. Modelar el
 precio unitario evita que la estimación se sature en viviendas grandes.<br><br>
