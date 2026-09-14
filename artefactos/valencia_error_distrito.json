@@ -1,0 +1,130 @@
+{
+  "Algirós": {
+    "n": 107,
+    "mae_eur": 25679.76,
+    "rmse_eur": 36496.17,
+    "mediana_error_pct": 13.01,
+    "r2": 0.7693,
+    "cobertura_2018": 0.8131
+  },
+  "Benicalap": {
+    "n": 268,
+    "mae_eur": 18872.58,
+    "rmse_eur": 26691.17,
+    "mediana_error_pct": 11.86,
+    "r2": 0.8608,
+    "cobertura_2018": 0.8209
+  },
+  "Benimaclet": {
+    "n": 102,
+    "mae_eur": 30042.63,
+    "rmse_eur": 46579.91,
+    "mediana_error_pct": 11.99,
+    "r2": 0.7091,
+    "cobertura_2018": 0.8039
+  },
+  "Camins al Grau": {
+    "n": 288,
+    "mae_eur": 42308.9,
+    "rmse_eur": 101690.22,
+    "mediana_error_pct": 14.66,
+    "r2": 0.7468,
+    "cobertura_2018": 0.7986
+  },
+  "Campanar": {
+    "n": 151,
+    "mae_eur": 37355.05,
+    "rmse_eur": 60592.19,
+    "mediana_error_pct": 14.63,
+    "r2": 0.8161,
+    "cobertura_2018": 0.7285
+  },
+  "Ciutat Vella": {
+    "n": 328,
+    "mae_eur": 62348.92,
+    "rmse_eur": 95975.18,
+    "mediana_error_pct": 14.68,
+    "r2": 0.8418,
+    "cobertura_2018": 0.7927
+  },
+  "El Pla del Real": {
+    "n": 161,
+    "mae_eur": 73986.61,
+    "rmse_eur": 130853.84,
+    "mediana_error_pct": 14.03,
+    "r2": 0.7878,
+    "cobertura_2018": 0.7702
+  },
+  "Extramurs": {
+    "n": 304,
+    "mae_eur": 32950.08,
+    "rmse_eur": 43628.84,
+    "mediana_error_pct": 11.85,
+    "r2": 0.7731,
+    "cobertura_2018": 0.8059
+  },
+  "Jesús": {
+    "n": 286,
+    "mae_eur": 18847.74,
+    "rmse_eur": 30524.06,
+    "mediana_error_pct": 12.48,
+    "r2": 0.7345,
+    "cobertura_2018": 0.8182
+  },
+  "L'Eixample": {
+    "n": 301,
+    "mae_eur": 72290.11,
+    "rmse_eur": 129811.22,
+    "mediana_error_pct": 13.22,
+    "r2": 0.7866,
+    "cobertura_2018": 0.7807
+  },
+  "L'Olivereta": {
+    "n": 292,
+    "mae_eur": 22691.07,
+    "rmse_eur": 30225.87,
+    "mediana_error_pct": 16.42,
+    "r2": 0.6266,
+    "cobertura_2018": 0.7911
+  },
+  "La Saïdia": {
+    "n": 241,
+    "mae_eur": 24849.0,
+    "rmse_eur": 38543.52,
+    "mediana_error_pct": 13.65,
+    "r2": 0.7359,
+    "cobertura_2018": 0.8257
+  },
+  "Patraix": {
+    "n": 280,
+    "mae_eur": 22674.45,
+    "rmse_eur": 62294.83,
+    "mediana_error_pct": 11.66,
+    "r2": 0.3561,
+    "cobertura_2018": 0.8786
+  },
+  "Poblats Marítims": {
+    "n": 288,
+    "mae_eur": 25391.64,
+    "rmse_eur": 39704.72,
+    "mediana_error_pct": 15.4,
+    "r2": 0.6645,
+    "cobertura_2018": 0.7882
+  },
+  "Quatre Carreres": {
+    "n": 399,
+    "mae_eur": 24782.96,
+    "rmse_eur": 36624.2,
+    "mediana_error_pct": 12.0,
+    "r2": 0.873,
+    "cobertura_2018": 0.8246
+  },
+  "Rascanya": {
+    "n": 299,
+    "mae_eur": 18035.33,
+    "rmse_eur": 26031.76,
+    "mediana_error_pct": 14.05,
+    "r2": 0.8789,
+    "cobertura_2018": 0.806
+  }
+}

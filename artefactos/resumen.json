@@ -1,0 +1,187 @@
+{
+  "Madrid": {
+    "modelo": {
+      "n": 11327,
+      "mae_eur": 58719.49,
+      "rmse_eur": 112893.21,
+      "mediana_error_pct": 11.79,
+      "r2": 0.9045
+    },
+    "baseline_ciudad": {
+      "n": 11327,
+      "mae_eur": 138297.51,
+      "rmse_eur": 225051.81,
+      "mediana_error_pct": 33.91,
+      "r2": 0.6204
+    },
+    "baseline_distrito": {
+      "n": 11327,
+      "mae_eur": 84657.94,
+      "rmse_eur": 152307.14,
+      "mediana_error_pct": 18.63,
+      "r2": 0.8261
+    },
+    "cobertura_2018": 0.8226,
+    "ancho_mediano_2018_eur": 131430.57,
+    "n_train": 52859,
+    "n_calibracion": 11327,
+    "n_test": 11327,
+    "ablacion_sin_localizacion": {
+      "n": 11327,
+      "mae_eur": 84032.0,
+      "rmse_eur": 146625.76,
+      "mediana_error_pct": 18.48,
+      "r2": 0.8389
+    },
+    "simulacion_campos_app": {
+      "n": 11327,
+      "mae_eur": 81879.19,
+      "rmse_eur": 142916.41,
+      "mediana_error_pct": 18.08,
+      "r2": 0.8469
+    },
+    "espacial_distritos_nuevos": {
+      "n": 16978,
+      "mae_eur": 73013.22,
+      "rmse_eur": 126012.86,
+      "mediana_error_pct": 15.34,
+      "r2": 0.8877,
+      "distritos": [
+        "Arganzuela",
+        "Chamberí",
+        "Moncloa",
+        "San Blas",
+        "Villaverde"
+      ]
+    },
+    "temporal_q4_nuevos": {
+      "n": 31298,
+      "mae_eur": 65340.17,
+      "rmse_eur": 127922.33,
+      "mediana_error_pct": 12.26,
+      "r2": 0.8931
+    }
+  },
+  "Barcelona": {
+    "modelo": {
+      "n": 6985,
+      "mae_eur": 54605.1,
+      "rmse_eur": 84501.98,
+      "mediana_error_pct": 11.29,
+      "r2": 0.8952
+    },
+    "baseline_ciudad": {
+      "n": 6985,
+      "mae_eur": 92082.62,
+      "rmse_eur": 134701.98,
+      "mediana_error_pct": 19.96,
+      "r2": 0.7337
+    },
+    "baseline_distrito": {
+      "n": 6985,
+      "mae_eur": 75101.34,
+      "rmse_eur": 110639.43,
+      "mediana_error_pct": 16.38,
+      "r2": 0.8204
+    },
+    "cobertura_2018": 0.8102,
+    "ancho_mediano_2018_eur": 143864.76,
+    "n_train": 32596,
+    "n_calibracion": 6985,
+    "n_test": 6985,
+    "ablacion_sin_localizacion": {
+      "n": 6985,
+      "mae_eur": 66038.83,
+      "rmse_eur": 98306.25,
+      "mediana_error_pct": 14.35,
+      "r2": 0.8582
+    },
+    "simulacion_campos_app": {
+      "n": 6985,
+      "mae_eur": 63720.86,
+      "rmse_eur": 96870.6,
+      "mediana_error_pct": 13.36,
+      "r2": 0.8623
+    },
+    "espacial_distritos_nuevos": {
+      "n": 8612,
+      "mae_eur": 54243.0,
+      "rmse_eur": 80633.79,
+      "mediana_error_pct": 15.57,
+      "r2": 0.8121,
+      "distritos": [
+        "Ciutat Vella",
+        "Nou Barris"
+      ]
+    },
+    "temporal_q4_nuevos": {
+      "n": 16483,
+      "mae_eur": 57335.43,
+      "rmse_eur": 89777.25,
+      "mediana_error_pct": 11.39,
+      "r2": 0.8872
+    }
+  },
+  "Valencia": {
+    "modelo": {
+      "n": 4095,
+      "mae_eur": 34134.65,
+      "rmse_eur": 67550.63,
+      "mediana_error_pct": 13.45,
+      "r2": 0.85
+    },
+    "baseline_ciudad": {
+      "n": 4095,
+      "mae_eur": 71256.25,
+      "rmse_eur": 131116.81,
+      "mediana_error_pct": 30.58,
+      "r2": 0.435
+    },
+    "baseline_distrito": {
+      "n": 4095,
+      "mae_eur": 52983.07,
+      "rmse_eur": 97830.08,
+      "mediana_error_pct": 22.45,
+      "r2": 0.6855
+    },
+    "cobertura_2018": 0.8059,
+    "ancho_mediano_2018_eur": 81903.14,
+    "n_train": 19105,
+    "n_calibracion": 4094,
+    "n_test": 4095,
+    "ablacion_sin_localizacion": {
+      "n": 4095,
+      "mae_eur": 43619.72,
+      "rmse_eur": 81203.67,
+      "mediana_error_pct": 17.9,
+      "r2": 0.7833
+    },
+    "simulacion_campos_app": {
+      "n": 4095,
+      "mae_eur": 52269.78,
+      "rmse_eur": 107045.95,
+      "mediana_error_pct": 19.46,
+      "r2": 0.6234
+    },
+    "espacial_distritos_nuevos": {
+      "n": 6854,
+      "mae_eur": 40826.85,
+      "rmse_eur": 73528.55,
+      "mediana_error_pct": 17.91,
+      "r2": 0.8377,
+      "distritos": [
+        "Algirós",
+        "Ciutat Vella",
+        "L'Olivereta",
+        "Rascanya"
+      ]
+    },
+    "temporal_q4_nuevos": {
+      "n": 10167,
+      "mae_eur": 39652.0,
+      "rmse_eur": 81920.71,
+      "mediana_error_pct": 14.25,
+      "r2": 0.8094
+    }
+  }
+}

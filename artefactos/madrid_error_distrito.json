@@ -1,0 +1,170 @@
+{
+  "Arganzuela": {
+    "n": 526,
+    "mae_eur": 39578.14,
+    "rmse_eur": 55633.73,
+    "mediana_error_pct": 9.69,
+    "r2": 0.8297,
+    "cobertura_2018": 0.8384
+  },
+  "Barajas": {
+    "n": 96,
+    "mae_eur": 41821.4,
+    "rmse_eur": 56200.98,
+    "mediana_error_pct": 10.63,
+    "r2": 0.8138,
+    "cobertura_2018": 0.8125
+  },
+  "Carabanchel": {
+    "n": 848,
+    "mae_eur": 28279.17,
+    "rmse_eur": 45957.01,
+    "mediana_error_pct": 12.53,
+    "r2": 0.8015,
+    "cobertura_2018": 0.7901
+  },
+  "Centro": {
+    "n": 1411,
+    "mae_eur": 71650.67,
+    "rmse_eur": 136784.29,
+    "mediana_error_pct": 11.79,
+    "r2": 0.8475,
+    "cobertura_2018": 0.8483
+  },
+  "Chamartín": {
+    "n": 568,
+    "mae_eur": 110965.66,
+    "rmse_eur": 196066.38,
+    "mediana_error_pct": 13.22,
+    "r2": 0.8579,
+    "cobertura_2018": 0.8046
+  },
+  "Chamberí": {
+    "n": 747,
+    "mae_eur": 84977.02,
+    "rmse_eur": 133965.45,
+    "mediana_error_pct": 10.3,
+    "r2": 0.9064,
+    "cobertura_2018": 0.8527
+  },
+  "Ciudad Lineal": {
+    "n": 680,
+    "mae_eur": 42136.32,
+    "rmse_eur": 77548.5,
+    "mediana_error_pct": 11.09,
+    "r2": 0.8602,
+    "cobertura_2018": 0.8559
+  },
+  "Fuencarral": {
+    "n": 427,
+    "mae_eur": 51859.74,
+    "rmse_eur": 76929.25,
+    "mediana_error_pct": 10.32,
+    "r2": 0.897,
+    "cobertura_2018": 0.8009
+  },
+  "Hortaleza": {
+    "n": 423,
+    "mae_eur": 65277.5,
+    "rmse_eur": 109227.09,
+    "mediana_error_pct": 12.18,
+    "r2": 0.7906,
+    "cobertura_2018": 0.7872
+  },
+  "Latina": {
+    "n": 603,
+    "mae_eur": 26203.16,
+    "rmse_eur": 39410.57,
+    "mediana_error_pct": 11.29,
+    "r2": 0.7553,
+    "cobertura_2018": 0.8176
+  },
+  "Moncloa": {
+    "n": 373,
+    "mae_eur": 93756.6,
+    "rmse_eur": 149581.35,
+    "mediana_error_pct": 12.46,
+    "r2": 0.8689,
+    "cobertura_2018": 0.8338
+  },
+  "Moratalaz": {
+    "n": 175,
+    "mae_eur": 29634.72,
+    "rmse_eur": 45721.77,
+    "mediana_error_pct": 10.61,
+    "r2": 0.8173,
+    "cobertura_2018": 0.8457
+  },
+  "Puente de Vallecas": {
+    "n": 646,
+    "mae_eur": 24008.97,
+    "rmse_eur": 34342.46,
+    "mediana_error_pct": 13.39,
+    "r2": 0.6885,
+    "cobertura_2018": 0.8065
+  },
+  "Retiro": {
+    "n": 497,
+    "mae_eur": 86478.96,
+    "rmse_eur": 161117.47,
+    "mediana_error_pct": 10.04,
+    "r2": 0.8575,
+    "cobertura_2018": 0.833
+  },
+  "Salamanca": {
+    "n": 998,
+    "mae_eur": 113151.18,
+    "rmse_eur": 188612.84,
+    "mediana_error_pct": 12.96,
+    "r2": 0.886,
+    "cobertura_2018": 0.7986
+  },
+  "San Blas": {
+    "n": 423,
+    "mae_eur": 34651.72,
+    "rmse_eur": 55994.07,
+    "mediana_error_pct": 12.19,
+    "r2": 0.801,
+    "cobertura_2018": 0.8203
+  },
+  "Tetuán": {
+    "n": 697,
+    "mae_eur": 53664.06,
+    "rmse_eur": 83147.99,
+    "mediana_error_pct": 13.72,
+    "r2": 0.8814,
+    "cobertura_2018": 0.8164
+  },
+  "Usera": {
+    "n": 283,
+    "mae_eur": 28238.91,
+    "rmse_eur": 51679.27,
+    "mediana_error_pct": 13.18,
+    "r2": 0.6967,
+    "cobertura_2018": 0.8551
+  },
+  "Vicálvaro": {
+    "n": 146,
+    "mae_eur": 24437.94,
+    "rmse_eur": 32281.89,
+    "mediana_error_pct": 9.46,
+    "r2": 0.7897,
+    "cobertura_2018": 0.8493
+  },
+  "Villa de Vallecas": {
+    "n": 332,
+    "mae_eur": 29116.3,
+    "rmse_eur": 53222.4,
+    "mediana_error_pct": 11.07,
+    "r2": 0.6589,
+    "cobertura_2018": 0.8313
+  },
+  "Villaverde": {
+    "n": 428,
+    "mae_eur": 22493.44,
+    "rmse_eur": 35065.97,
+    "mediana_error_pct": 12.07,
+    "r2": 0.6714,
+    "cobertura_2018": 0.7921
+  }
+}

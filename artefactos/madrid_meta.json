@@ -1,0 +1,1058 @@
+{
+  "ciudad": "Madrid",
+  "features": [
+    "CONSTRUCTEDAREA",
+    "ROOMNUMBER",
+    "BATHNUMBER",
+    "HASTERRACE",
+    "HASLIFT",
+    "HASAIRCONDITIONING",
+    "AMENITYID",
+    "HASPARKINGSPACE",
+    "ISPARKINGSPACEINCLUDEDINPRICE",
+    "PARKINGSPACEPRICE",
+    "HASNORTHORIENTATION",
+    "HASSOUTHORIENTATION",
+    "HASEASTORIENTATION",
+    "HASWESTORIENTATION",
+    "HASBOXROOM",
+    "HASWARDROBE",
+    "HASSWIMMINGPOOL",
+    "HASDOORMAN",
+    "HASGARDEN",
+    "ISDUPLEX",
+    "ISSTUDIO",
+    "ISINTOPFLOOR",
+    "CONSTRUCTIONYEAR",
+    "FLOORCLEAN",
+    "FLATLOCATIONID",
+    "CADCONSTRUCTIONYEAR",
+    "CADMAXBUILDINGFLOOR",
+    "CADDWELLINGCOUNT",
+    "CADASTRALQUALITYID",
+    "BUILTTYPEID_1",
+    "BUILTTYPEID_2",
+    "BUILTTYPEID_3",
+    "DISTANCE_TO_CITY_CENTER",
+    "DISTANCE_TO_METRO",
+    "DISTANCE_TO_CASTELLANA",
+    "LONGITUDE",
+    "LATITUDE",
+    "ANTIGUEDAD_2018",
+    "AREA_POR_HABITACION"
+  ],
+  "medianas_train": {
+    "CONSTRUCTEDAREA": 82.0,
+    "ROOMNUMBER": 3.0,
+    "BATHNUMBER": 1.0,
+    "HASTERRACE": 0.0,
+    "HASLIFT": 1.0,
+    "HASAIRCONDITIONING": 0.0,
+    "AMENITYID": 3.0,
+    "HASPARKINGSPACE": 0.0,
+    "ISPARKINGSPACEINCLUDEDINPRICE": 0.0,
+    "PARKINGSPACEPRICE": 1.0,
+    "HASNORTHORIENTATION": 0.0,
+    "HASSOUTHORIENTATION": 0.0,
+    "HASEASTORIENTATION": 0.0,
+    "HASWESTORIENTATION": 0.0,
+    "HASBOXROOM": 0.0,
+    "HASWARDROBE": 1.0,
+    "HASSWIMMINGPOOL": 0.0,
+    "HASDOORMAN": 0.0,
+    "HASGARDEN": 0.0,
+    "ISDUPLEX": 0.0,
+    "ISSTUDIO": 0.0,
+    "ISINTOPFLOOR": 0.0,
+    "CONSTRUCTIONYEAR": 1968.0,
+    "FLOORCLEAN": 2.0,
+    "FLATLOCATIONID": 1.0,
+    "CADCONSTRUCTIONYEAR": 1967.0,
+    "CADMAXBUILDINGFLOOR": 6.0,
+    "CADDWELLINGCOUNT": 21.0,
+    "CADASTRALQUALITYID": 5.0,
+    "BUILTTYPEID_1": 0.0,
+    "BUILTTYPEID_2": 0.0,
+    "BUILTTYPEID_3": 1.0,
+    "DISTANCE_TO_CITY_CENTER": 4.125994098622569,
+    "DISTANCE_TO_METRO": 0.3314321108958644,
+    "DISTANCE_TO_CASTELLANA": 1.966558713034563,
+    "LONGITUDE": -3.6939163057234,
+    "LATITUDE": 40.4231008203163,
+    "ANTIGUEDAD_2018": 51.0,
+    "AREA_POR_HABITACION": 35.25
+  },
+  "centroides": [
+    {
+      "lat": 40.45569,
+      "lon": -3.63511,
+      "barrio": "Conde Orgaz-Piovera",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.47249,
+      "lon": -3.64704,
+      "barrio": "Pinar del Rey",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.47425,
+      "lon": -3.59158,
+      "barrio": "Timón",
+      "distrito": "Barajas"
+    },
+    {
+      "lat": 40.4154,
+      "lon": -3.71402,
+      "barrio": "Palacio",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.41488,
+      "lon": -3.69701,
+      "barrio": "Huertas-Cortes",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.40615,
+      "lon": -3.71826,
+      "barrio": "Imperial",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.39478,
+      "lon": -3.69903,
+      "barrio": "Chopera",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.40384,
+      "lon": -3.6923,
+      "barrio": "Palos de Moguer",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.40108,
+      "lon": -3.67104,
+      "barrio": "Adelfas",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.42506,
+      "lon": -3.67443,
+      "barrio": "Goya",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.43201,
+      "lon": -3.67583,
+      "barrio": "Lista",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.55245,
+      "lon": -3.77447,
+      "barrio": "El Pardo",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.45599,
+      "lon": -3.73841,
+      "barrio": "Ciudad Universitaria",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.4653,
+      "lon": -3.71728,
+      "barrio": "Valdezarza",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.37059,
+      "lon": -3.7533,
+      "barrio": "Buena Vista",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.38361,
+      "lon": -3.69928,
+      "barrio": "Almendrales",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.36861,
+      "lon": -3.71243,
+      "barrio": "Orcasitas",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.3906,
+      "lon": -3.64824,
+      "barrio": "Portazgo",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.39849,
+      "lon": -3.63219,
+      "barrio": "Pavones",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.40855,
+      "lon": -3.62692,
+      "barrio": "Horcajo",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.38343,
+      "lon": -3.61137,
+      "barrio": "Santa Eugenia",
+      "distrito": "Villa de Vallecas"
+    },
+    {
+      "lat": 40.34771,
+      "lon": -3.61572,
+      "barrio": "Ensanche de Vallecas - La Gavia",
+      "distrito": "Villa de Vallecas"
+    },
+    {
+      "lat": 40.40904,
+      "lon": -3.60715,
+      "barrio": "Ambroz",
+      "distrito": "Vicálvaro"
+    },
+    {
+      "lat": 40.39158,
+      "lon": -3.56438,
+      "barrio": "El Cañaveral - Los Berrocales",
+      "distrito": "Vicálvaro"
+    },
+    {
+      "lat": 40.43357,
+      "lon": -3.68431,
+      "barrio": "Castellana",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.45535,
+      "lon": -3.67714,
+      "barrio": "Bernabéu-Hispanoamérica",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.46274,
+      "lon": -3.67816,
+      "barrio": "Nueva España",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.45246,
+      "lon": -3.70767,
+      "barrio": "Bellas Vistas",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.45963,
+      "lon": -3.70492,
+      "barrio": "Berruguete",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.44242,
+      "lon": -3.69773,
+      "barrio": "Nuevos Ministerios-Ríos Rosas",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.48115,
+      "lon": -3.69672,
+      "barrio": "La Paz",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.53129,
+      "lon": -3.70179,
+      "barrio": "Montecarmelo",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.39193,
+      "lon": -3.75673,
+      "barrio": "Aluche",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.3966,
+      "lon": -3.72835,
+      "barrio": "San Isidro",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.39347,
+      "lon": -3.71199,
+      "barrio": "Comillas",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.38438,
+      "lon": -3.7457,
+      "barrio": "Vista Alegre",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.42248,
+      "lon": -3.64742,
+      "barrio": "Ventas",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.43701,
+      "lon": -3.64504,
+      "barrio": "Quintana",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.45069,
+      "lon": -3.6564,
+      "barrio": "San Juan Bautista",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.34102,
+      "lon": -3.68822,
+      "barrio": "San Cristóbal",
+      "distrito": "Villaverde"
+    },
+    {
+      "lat": 40.35583,
+      "lon": -3.69921,
+      "barrio": "Los Ángeles",
+      "distrito": "Villaverde"
+    },
+    {
+      "lat": 40.42742,
+      "lon": -3.5942,
+      "barrio": "Rosas",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.42124,
+      "lon": -3.61757,
+      "barrio": "Arcos",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.41378,
+      "lon": -3.68528,
+      "barrio": "Jerónimos",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.47719,
+      "lon": -3.70961,
+      "barrio": "Pilar",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.50556,
+      "lon": -3.67007,
+      "barrio": "Las Tablas",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.41072,
+      "lon": -3.64064,
+      "barrio": "Marroquina",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.46808,
+      "lon": -3.77904,
+      "barrio": "Valdemarín",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.40423,
+      "lon": -3.67819,
+      "barrio": "Pacífico",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.41411,
+      "lon": -3.66559,
+      "barrio": "Estrella",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.44487,
+      "lon": -3.68475,
+      "barrio": "El Viso",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.40976,
+      "lon": -3.73166,
+      "barrio": "Puerta del Ángel",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.46983,
+      "lon": -3.82085,
+      "barrio": "El Plantío",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.47644,
+      "lon": -3.65942,
+      "barrio": "Apóstol Santiago",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.40523,
+      "lon": -3.6425,
+      "barrio": "Vinateros",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.43635,
+      "lon": -3.66662,
+      "barrio": "Guindalera",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.43934,
+      "lon": -3.64922,
+      "barrio": "Concepción",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.44423,
+      "lon": -3.66932,
+      "barrio": "Prosperidad",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.45255,
+      "lon": -3.61576,
+      "barrio": "Palomas",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.45806,
+      "lon": -3.66034,
+      "barrio": "Colina",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.40228,
+      "lon": -3.75037,
+      "barrio": "Lucero",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.48723,
+      "lon": -3.66668,
+      "barrio": "Virgen del Cortijo - Manoteras",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.44281,
+      "lon": -3.65348,
+      "barrio": "San Pascual",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.39694,
+      "lon": -3.68645,
+      "barrio": "Delicias",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.41189,
+      "lon": -3.65685,
+      "barrio": "Media Legua",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.41889,
+      "lon": -3.6744,
+      "barrio": "Ibiza",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.41158,
+      "lon": -3.67345,
+      "barrio": "Niño Jesús",
+      "distrito": "Retiro"
+    },
+    {
+      "lat": 40.49469,
+      "lon": -3.68709,
+      "barrio": "Tres Olivos - Valverde",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.42825,
+      "lon": -3.71805,
+      "barrio": "Argüelles",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.4246,
+      "lon": -3.68581,
+      "barrio": "Recoletos",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.42477,
+      "lon": -3.66382,
+      "barrio": "Fuente del Berro",
+      "distrito": "Salamanca"
+    },
+    {
+      "lat": 40.46042,
+      "lon": -3.69414,
+      "barrio": "Cuzco-Castillejos",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.38179,
+      "lon": -3.7711,
+      "barrio": "Águilas",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.40136,
+      "lon": -3.64671,
+      "barrio": "Fontarrón",
+      "distrito": "Moratalaz"
+    },
+    {
+      "lat": 40.47655,
+      "lon": -3.66857,
+      "barrio": "Costillares",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.3902,
+      "lon": -3.72178,
+      "barrio": "Opañel",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.42628,
+      "lon": -3.63542,
+      "barrio": "Pueblo Nuevo",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.40331,
+      "lon": -3.60697,
+      "barrio": "Casco Histórico de Vicálvaro",
+      "distrito": "Vicálvaro"
+    },
+    {
+      "lat": 40.44308,
+      "lon": -3.61037,
+      "barrio": "Canillejas",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.37213,
+      "lon": -3.6982,
+      "barrio": "12 de Octubre-Orcasur",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.42367,
+      "lon": -3.69668,
+      "barrio": "Chueca-Justicia",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.38527,
+      "lon": -3.63721,
+      "barrio": "Palomeras sureste",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.37632,
+      "lon": -3.62133,
+      "barrio": "Casco Histórico de Vallecas",
+      "distrito": "Villa de Vallecas"
+    },
+    {
+      "lat": 40.39952,
+      "lon": -3.65859,
+      "barrio": "Numancia",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.40105,
+      "lon": -3.70724,
+      "barrio": "Acacias",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.43496,
+      "lon": -3.71462,
+      "barrio": "Gaztambide",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.39,
+      "lon": -3.66788,
+      "barrio": "San Diego",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.4483,
+      "lon": -3.673,
+      "barrio": "Ciudad Jardín",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.38888,
+      "lon": -3.68705,
+      "barrio": "Legazpi",
+      "distrito": "Arganzuela"
+    },
+    {
+      "lat": 40.43284,
+      "lon": -3.69354,
+      "barrio": "Almagro",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.38508,
+      "lon": -3.80344,
+      "barrio": "Campamento",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.3689,
+      "lon": -3.78656,
+      "barrio": "Cuatro Vientos",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.44289,
+      "lon": -3.71126,
+      "barrio": "Vallehermoso",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.4643,
+      "lon": -3.66497,
+      "barrio": "Atalaya",
+      "distrito": "Ciudad Lineal"
+    },
+    {
+      "lat": 40.38469,
+      "lon": -3.65882,
+      "barrio": "Palomeras Bajas",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.33707,
+      "lon": -3.67629,
+      "barrio": "Butarque",
+      "distrito": "Villaverde"
+    },
+    {
+      "lat": 40.47408,
+      "lon": -3.57894,
+      "barrio": "Casco Histórico de Barajas",
+      "distrito": "Barajas"
+    },
+    {
+      "lat": 40.46421,
+      "lon": -3.60711,
+      "barrio": "Campo de las Naciones-Corralejos",
+      "distrito": "Barajas"
+    },
+    {
+      "lat": 40.37892,
+      "lon": -3.72617,
+      "barrio": "Abrantes",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.47436,
+      "lon": -3.67983,
+      "barrio": "Castilla",
+      "distrito": "Chamartín"
+    },
+    {
+      "lat": 40.35568,
+      "lon": -3.68852,
+      "barrio": "Los Rosales",
+      "distrito": "Villaverde"
+    },
+    {
+      "lat": 40.34135,
+      "lon": -3.70881,
+      "barrio": "San Andrés",
+      "distrito": "Villaverde"
+    },
+    {
+      "lat": 40.45153,
+      "lon": -3.69701,
+      "barrio": "Cuatro Caminos",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.37935,
+      "lon": -3.71531,
+      "barrio": "Zofío",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.40924,
+      "lon": -3.70252,
+      "barrio": "Lavapiés-Embajadores",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.45653,
+      "lon": -3.59163,
+      "barrio": "Alameda de Osuna",
+      "distrito": "Barajas"
+    },
+    {
+      "lat": 40.37814,
+      "lon": -3.70718,
+      "barrio": "Pradolongo",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.47067,
+      "lon": -3.69436,
+      "barrio": "Ventilla-Almenara",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.3706,
+      "lon": -3.68903,
+      "barrio": "San Fermín",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.42567,
+      "lon": -3.7071,
+      "barrio": "Malasaña-Universidad",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.389,
+      "lon": -3.70675,
+      "barrio": "Moscardó",
+      "distrito": "Usera"
+    },
+    {
+      "lat": 40.43286,
+      "lon": -3.70114,
+      "barrio": "Trafalgar",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.4344,
+      "lon": -3.70803,
+      "barrio": "Arapiles",
+      "distrito": "Chamberí"
+    },
+    {
+      "lat": 40.39708,
+      "lon": -3.61461,
+      "barrio": "Valdebernardo - Valderribas",
+      "distrito": "Vicálvaro"
+    },
+    {
+      "lat": 40.43535,
+      "lon": -3.62508,
+      "barrio": "Simancas",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.43091,
+      "lon": -3.61686,
+      "barrio": "Hellín",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.44514,
+      "lon": -3.57078,
+      "barrio": "Rejas",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.42615,
+      "lon": -3.62202,
+      "barrio": "Amposta",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.44526,
+      "lon": -3.63093,
+      "barrio": "Salvador",
+      "distrito": "San Blas"
+    },
+    {
+      "lat": 40.49081,
+      "lon": -3.72461,
+      "barrio": "Arroyo del Fresno",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.37474,
+      "lon": -3.67307,
+      "barrio": "Entrevías",
+      "distrito": "Puente de Vallecas"
+    },
+    {
+      "lat": 40.37965,
+      "lon": -3.73909,
+      "barrio": "Puerta Bonita",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.46378,
+      "lon": -3.64372,
+      "barrio": "Canillas",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.36584,
+      "lon": -3.7467,
+      "barrio": "Pau de Carabanchel",
+      "distrito": "Carabanchel"
+    },
+    {
+      "lat": 40.48632,
+      "lon": -3.62168,
+      "barrio": "Valdebebas - Valdefuentes",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.49351,
+      "lon": -3.65467,
+      "barrio": "Sanchinarro",
+      "distrito": "Hortaleza"
+    },
+    {
+      "lat": 40.47876,
+      "lon": -3.56347,
+      "barrio": "Aeropuerto",
+      "distrito": "Barajas"
+    },
+    {
+      "lat": 40.41728,
+      "lon": -3.70456,
+      "barrio": "Sol",
+      "distrito": "Centro"
+    },
+    {
+      "lat": 40.4938,
+      "lon": -3.71024,
+      "barrio": "Mirasierra",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.46706,
+      "lon": -3.70416,
+      "barrio": "Valdeacederas",
+      "distrito": "Tetuán"
+    },
+    {
+      "lat": 40.48239,
+      "lon": -3.74103,
+      "barrio": "Fuentelarreina",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.47876,
+      "lon": -3.72582,
+      "barrio": "Peñagrande",
+      "distrito": "Fuencarral"
+    },
+    {
+      "lat": 40.40151,
+      "lon": -3.7359,
+      "barrio": "Los Cármenes",
+      "distrito": "Latina"
+    },
+    {
+      "lat": 40.42363,
+      "lon": -3.75301,
+      "barrio": "Casa de Campo",
+      "distrito": "Moncloa"
+    },
+    {
+      "lat": 40.45473,
+      "lon": -3.77925,
+      "barrio": "Aravaca",
+      "distrito": "Moncloa"
+    }
+  ],
+  "n_anuncios": 75513,
+  "n_activos": 75513,
+  "distritos": {
+    "Arganzuela": {
+      "media_2018_eur_m2": 3966.3031064721813,
+      "n_train": 2503
+    },
+    "Barajas": {
+      "media_2018_eur_m2": 3242.2608823279174,
+      "n_train": 530
+    },
+    "Carabanchel": {
+      "media_2018_eur_m2": 2106.926841450332,
+      "n_train": 3591
+    },
+    "Centro": {
+      "media_2018_eur_m2": 4953.956999025303,
+      "n_train": 6396
+    },
+    "Chamartín": {
+      "media_2018_eur_m2": 4861.406395969029,
+      "n_train": 2823
+    },
+    "Chamberí": {
+      "media_2018_eur_m2": 5315.576692546486,
+      "n_train": 3437
+    },
+    "Ciudad Lineal": {
+      "media_2018_eur_m2": 2984.642209652406,
+      "n_train": 3149
+    },
+    "Fuencarral": {
+      "media_2018_eur_m2": 3381.6316828905833,
+      "n_train": 1911
+    },
+    "Hortaleza": {
+      "media_2018_eur_m2": 3518.2048374168285,
+      "n_train": 2017
+    },
+    "Latina": {
+      "media_2018_eur_m2": 2280.049723577996,
+      "n_train": 2667
+    },
+    "Moncloa": {
+      "media_2018_eur_m2": 4193.743024559766,
+      "n_train": 1931
+    },
+    "Moratalaz": {
+      "media_2018_eur_m2": 2411.3703743522155,
+      "n_train": 709
+    },
+    "Puente de Vallecas": {
+      "media_2018_eur_m2": 1825.9697694949853,
+      "n_train": 3315
+    },
+    "Retiro": {
+      "media_2018_eur_m2": 4692.863273869316,
+      "n_train": 2156
+    },
+    "Salamanca": {
+      "media_2018_eur_m2": 5565.629490162792,
+      "n_train": 4598
+    },
+    "San Blas": {
+      "media_2018_eur_m2": 2490.1126647765886,
+      "n_train": 2039
+    },
+    "Tetuán": {
+      "media_2018_eur_m2": 3562.322880418099,
+      "n_train": 3244
+    },
+    "Usera": {
+      "media_2018_eur_m2": 2029.3184091412757,
+      "n_train": 1690
+    },
+    "Vicálvaro": {
+      "media_2018_eur_m2": 2132.103066978847,
+      "n_train": 670
+    },
+    "Villa de Vallecas": {
+      "media_2018_eur_m2": 2280.1990763610665,
+      "n_train": 1456
+    },
+    "Villaverde": {
+      "media_2018_eur_m2": 1665.1632652989726,
+      "n_train": 2027
+    }
+  },
+  "ajuste_calibracion_eur": 0.0,
+  "evaluacion": {
+    "modelo": {
+      "n": 11327,
+      "mae_eur": 58719.49,
+      "rmse_eur": 112893.21,
+      "mediana_error_pct": 11.79,
+      "r2": 0.9045
+    },
+    "baseline_ciudad": {
+      "n": 11327,
+      "mae_eur": 138297.51,
+      "rmse_eur": 225051.81,
+      "mediana_error_pct": 33.91,
+      "r2": 0.6204
+    },
+    "baseline_distrito": {
+      "n": 11327,
+      "mae_eur": 84657.94,
+      "rmse_eur": 152307.14,
+      "mediana_error_pct": 18.63,
+      "r2": 0.8261
+    },
+    "cobertura_2018": 0.8226,
+    "ancho_mediano_2018_eur": 131430.57,
+    "n_train": 52859,
+    "n_calibracion": 11327,
+    "n_test": 11327,
+    "ablacion_sin_localizacion": {
+      "n": 11327,
+      "mae_eur": 84032.0,
+      "rmse_eur": 146625.76,
+      "mediana_error_pct": 18.48,
+      "r2": 0.8389
+    },
+    "simulacion_campos_app": {
+      "n": 11327,
+      "mae_eur": 81879.19,
+      "rmse_eur": 142916.41,
+      "mediana_error_pct": 18.08,
+      "r2": 0.8469
+    },
+    "espacial_distritos_nuevos": {
+      "n": 16978,
+      "mae_eur": 73013.22,
+      "rmse_eur": 126012.86,
+      "mediana_error_pct": 15.34,
+      "r2": 0.8877,
+      "distritos": [
+        "Arganzuela",
+        "Chamberí",
+        "Moncloa",
+        "San Blas",
+        "Villaverde"
+      ]
+    },
+    "temporal_q4_nuevos": {
+      "n": 31298,
+      "mae_eur": 65340.17,
+      "rmse_eur": 127922.33,
+      "mediana_error_pct": 12.26,
+      "r2": 0.8931
+    }
+  },
+  "flujo": {
+    "inicial": 94815,
+    "duplicados_asset_period": 19011,
+    "excluidos_por_rango_o_ubicacion": 215,
+    "final": 75513,
+    "sin_distrito": 76
+  },
+  "fecha_base": "2018",
+  "validacion_precios_actuales": false
+}

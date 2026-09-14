@@ -1,0 +1,615 @@
+{
+  "ciudad": "Barcelona",
+  "features": [
+    "CONSTRUCTEDAREA",
+    "ROOMNUMBER",
+    "BATHNUMBER",
+    "HASTERRACE",
+    "HASLIFT",
+    "HASAIRCONDITIONING",
+    "AMENITYID",
+    "HASPARKINGSPACE",
+    "ISPARKINGSPACEINCLUDEDINPRICE",
+    "PARKINGSPACEPRICE",
+    "HASNORTHORIENTATION",
+    "HASSOUTHORIENTATION",
+    "HASEASTORIENTATION",
+    "HASWESTORIENTATION",
+    "HASBOXROOM",
+    "HASWARDROBE",
+    "HASSWIMMINGPOOL",
+    "HASDOORMAN",
+    "HASGARDEN",
+    "ISDUPLEX",
+    "ISSTUDIO",
+    "ISINTOPFLOOR",
+    "CONSTRUCTIONYEAR",
+    "FLOORCLEAN",
+    "FLATLOCATIONID",
+    "CADCONSTRUCTIONYEAR",
+    "CADMAXBUILDINGFLOOR",
+    "CADDWELLINGCOUNT",
+    "CADASTRALQUALITYID",
+    "BUILTTYPEID_1",
+    "BUILTTYPEID_2",
+    "BUILTTYPEID_3",
+    "DISTANCE_TO_CITY_CENTER",
+    "DISTANCE_TO_METRO",
+    "DISTANCE_TO_DIAGONAL",
+    "LONGITUDE",
+    "LATITUDE",
+    "ANTIGUEDAD_2018",
+    "AREA_POR_HABITACION"
+  ],
+  "medianas_train": {
+    "CONSTRUCTEDAREA": 82.0,
+    "ROOMNUMBER": 3.0,
+    "BATHNUMBER": 1.0,
+    "HASTERRACE": 0.0,
+    "HASLIFT": 1.0,
+    "HASAIRCONDITIONING": 0.0,
+    "AMENITYID": 3.0,
+    "HASPARKINGSPACE": 0.0,
+    "ISPARKINGSPACEINCLUDEDINPRICE": 0.0,
+    "PARKINGSPACEPRICE": 1.0,
+    "HASNORTHORIENTATION": 0.0,
+    "HASSOUTHORIENTATION": 0.0,
+    "HASEASTORIENTATION": 0.0,
+    "HASWESTORIENTATION": 0.0,
+    "HASBOXROOM": 0.0,
+    "HASWARDROBE": 0.0,
+    "HASSWIMMINGPOOL": 0.0,
+    "HASDOORMAN": 0.0,
+    "HASGARDEN": 0.0,
+    "ISDUPLEX": 0.0,
+    "ISSTUDIO": 0.0,
+    "ISINTOPFLOOR": 0.0,
+    "CONSTRUCTIONYEAR": 1965.0,
+    "FLOORCLEAN": 2.0,
+    "FLATLOCATIONID": 1.0,
+    "CADCONSTRUCTIONYEAR": 1964.0,
+    "CADMAXBUILDINGFLOOR": 6.0,
+    "CADDWELLINGCOUNT": 17.0,
+    "CADASTRALQUALITYID": 4.0,
+    "BUILTTYPEID_1": 0.0,
+    "BUILTTYPEID_2": 0.0,
+    "BUILTTYPEID_3": 1.0,
+    "DISTANCE_TO_CITY_CENTER": 2.6173823057423067,
+    "DISTANCE_TO_METRO": 0.24719818218238065,
+    "DISTANCE_TO_DIAGONAL": 1.6312131672564845,
+    "LONGITUDE": 2.16656575276425,
+    "LATITUDE": 41.3982535011227,
+    "ANTIGUEDAD_2018": 54.0,
+    "AREA_POR_HABITACION": 30.0
+  },
+  "centroides": [
+    {
+      "lat": 41.43487,
+      "lon": 2.17873,
+      "barrio": "Porta",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.45078,
+      "lon": 2.19357,
+      "barrio": "La Trinitat Vella",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.44588,
+      "lon": 2.19912,
+      "barrio": "Baró de Viver",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.41685,
+      "lon": 2.19803,
+      "barrio": "Sant Martí de Provençals",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.3599,
+      "lon": 2.13975,
+      "barrio": "La Marina del Port",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.35167,
+      "lon": 2.14251,
+      "barrio": "La Marina del Prat Vermell",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.39129,
+      "lon": 2.10996,
+      "barrio": "Pedralbes",
+      "distrito": "Les Corts"
+    },
+    {
+      "lat": 41.41904,
+      "lon": 2.09655,
+      "barrio": "Vallvidrera - El Tibidabo i les Planes",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.41245,
+      "lon": 2.15431,
+      "barrio": "La Salut",
+      "distrito": "Gràcia"
+    },
+    {
+      "lat": 41.41632,
+      "lon": 2.14102,
+      "barrio": "Vallcarca i els Penitents",
+      "distrito": "Gràcia"
+    },
+    {
+      "lat": 41.4117,
+      "lon": 2.16787,
+      "barrio": "El Baix Guinardó",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.42174,
+      "lon": 2.15599,
+      "barrio": "El Carmel",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.44823,
+      "lon": 2.17536,
+      "barrio": "Les Roquetes",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.45061,
+      "lon": 2.18508,
+      "barrio": "La Trinitat Nova",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.41201,
+      "lon": 2.18246,
+      "barrio": "El Camp de l'Arpa del Clot",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.41269,
+      "lon": 2.22101,
+      "barrio": "El Besòs",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.411,
+      "lon": 2.2026,
+      "barrio": "Provençals del Poblenou",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.40476,
+      "lon": 2.21491,
+      "barrio": "Diagonal Mar i el Front Marítim del Poblenou",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.37878,
+      "lon": 2.17064,
+      "barrio": "El Raval",
+      "distrito": "Ciutat Vella"
+    },
+    {
+      "lat": 41.40543,
+      "lon": 2.17662,
+      "barrio": "La Sagrada Família",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.36893,
+      "lon": 2.13636,
+      "barrio": "La Bordeta",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.40983,
+      "lon": 2.13012,
+      "barrio": "Sant Gervasi - La Bonanova",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.40266,
+      "lon": 2.1162,
+      "barrio": "Sarrià",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.39803,
+      "lon": 2.12985,
+      "barrio": "Les Tres Torres",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.36973,
+      "lon": 2.14479,
+      "barrio": "La Font de la Guatlla",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.40634,
+      "lon": 2.165,
+      "barrio": "El Camp d'En Grassot i Gràcia Nova",
+      "distrito": "Gràcia"
+    },
+    {
+      "lat": 41.40313,
+      "lon": 2.1569,
+      "barrio": "Vila de Gràcia",
+      "distrito": "Gràcia"
+    },
+    {
+      "lat": 41.33806,
+      "lon": 2.14301,
+      "barrio": "Zona Franca - Port",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.44281,
+      "lon": 2.17565,
+      "barrio": "Verdun",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.44266,
+      "lon": 2.18195,
+      "barrio": "La Prosperitat",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.37535,
+      "lon": 2.14428,
+      "barrio": "Hostafrancs",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.43004,
+      "lon": 2.14921,
+      "barrio": "La Vall d'Hebron - La Clota",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.43696,
+      "lon": 2.19022,
+      "barrio": "Sant Andreu",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.40966,
+      "lon": 2.18998,
+      "barrio": "El Clot",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.4578,
+      "lon": 2.17736,
+      "barrio": "Ciutat Meridiana - Torre Baró - Vallbona",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.39753,
+      "lon": 2.14302,
+      "barrio": "Sant Gervasi - Galvany",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.42399,
+      "lon": 2.20308,
+      "barrio": "La Verneda i la Pau",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.3691,
+      "lon": 2.18759,
+      "barrio": "La Barceloneta",
+      "distrito": "Ciutat Vella"
+    },
+    {
+      "lat": 41.38668,
+      "lon": 2.18354,
+      "barrio": "Sant Pere - Santa Caterina i la Ribera",
+      "distrito": "Ciutat Vella"
+    },
+    {
+      "lat": 41.42322,
+      "lon": 2.19017,
+      "barrio": "La Sagrera",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.43891,
+      "lon": 2.16886,
+      "barrio": "La Guineueta",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.37992,
+      "lon": 2.17824,
+      "barrio": "El Gòtic",
+      "distrito": "Ciutat Vella"
+    },
+    {
+      "lat": 41.38699,
+      "lon": 2.13479,
+      "barrio": "Les Corts",
+      "distrito": "Les Corts"
+    },
+    {
+      "lat": 41.4286,
+      "lon": 2.17409,
+      "barrio": "Vilapicina i la Torre Llobeta",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.42307,
+      "lon": 2.14654,
+      "barrio": "La Teixonera",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.38118,
+      "lon": 2.11743,
+      "barrio": "La Maternitat i Sant Ramon",
+      "distrito": "Les Corts"
+    },
+    {
+      "lat": 41.43296,
+      "lon": 2.16831,
+      "barrio": "Can Peguera - El Turó de la Peira",
+      "distrito": "Nou Barris"
+    },
+    {
+      "lat": 41.40688,
+      "lon": 2.14394,
+      "barrio": "El Putxet i el Farró",
+      "distrito": "Sarrià-Sant Gervasi"
+    },
+    {
+      "lat": 41.418,
+      "lon": 2.18595,
+      "barrio": "Navas",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.43699,
+      "lon": 2.2018,
+      "barrio": "El Bon Pastor",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.39929,
+      "lon": 2.20323,
+      "barrio": "El Poblenou",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.39842,
+      "lon": 2.1904,
+      "barrio": "El Parc i la Llacuna del Poblenou",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.42457,
+      "lon": 2.18085,
+      "barrio": "El Congrés i els Indians",
+      "distrito": "Sant Andreu"
+    },
+    {
+      "lat": 41.38998,
+      "lon": 2.19795,
+      "barrio": "La Vila Olímpica del Poblenou",
+      "distrito": "Sant Martí"
+    },
+    {
+      "lat": 41.38305,
+      "lon": 2.14896,
+      "barrio": "La Nova Esquerra de l'Eixample",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.38938,
+      "lon": 2.15511,
+      "barrio": "L'Antiga Esquerra de l'Eixample",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.37845,
+      "lon": 2.15927,
+      "barrio": "Sant Antoni",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.39388,
+      "lon": 2.16818,
+      "barrio": "La Dreta de l'Eixample",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.39749,
+      "lon": 2.18155,
+      "barrio": "El Fort Pienc",
+      "distrito": "Eixample"
+    },
+    {
+      "lat": 41.3746,
+      "lon": 2.12776,
+      "barrio": "Sants - Badal",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.37745,
+      "lon": 2.1363,
+      "barrio": "Sants",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.41817,
+      "lon": 2.14777,
+      "barrio": "El Coll",
+      "distrito": "Gràcia"
+    },
+    {
+      "lat": 41.43173,
+      "lon": 2.13462,
+      "barrio": "Sant Genís Dels Agudells - Montbau",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.44025,
+      "lon": 2.15291,
+      "barrio": "Horta",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.41881,
+      "lon": 2.17367,
+      "barrio": "El Guinardó",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.42452,
+      "lon": 2.16525,
+      "barrio": "La Font d'En Fargues",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.41663,
+      "lon": 2.16229,
+      "barrio": "Can Baró",
+      "distrito": "Horta-Guinardó"
+    },
+    {
+      "lat": 41.36533,
+      "lon": 2.15825,
+      "barrio": "El Poble Sec - Parc de Montjuïc",
+      "distrito": "Sants-Montjuïc"
+    },
+    {
+      "lat": 41.44518,
+      "lon": 2.16513,
+      "barrio": "Canyelles",
+      "distrito": "Nou Barris"
+    }
+  ],
+  "n_anuncios": 46566,
+  "n_activos": 46566,
+  "distritos": {
+    "Ciutat Vella": {
+      "media_2018_eur_m2": 4313.424349373936,
+      "n_train": 4165
+    },
+    "Eixample": {
+      "media_2018_eur_m2": 4586.5841638542,
+      "n_train": 7480
+    },
+    "Gràcia": {
+      "media_2018_eur_m2": 4276.396800708354,
+      "n_train": 2437
+    },
+    "Horta-Guinardó": {
+      "media_2018_eur_m2": 3174.744643353883,
+      "n_train": 2330
+    },
+    "Les Corts": {
+      "media_2018_eur_m2": 4559.917993005325,
+      "n_train": 1289
+    },
+    "Nou Barris": {
+      "media_2018_eur_m2": 2535.3997360326143,
+      "n_train": 1801
+    },
+    "Sant Andreu": {
+      "media_2018_eur_m2": 3096.2333464695207,
+      "n_train": 1970
+    },
+    "Sant Martí": {
+      "media_2018_eur_m2": 3755.5488423678703,
+      "n_train": 4509
+    },
+    "Sants-Montjuïc": {
+      "media_2018_eur_m2": 3667.6715903642944,
+      "n_train": 4000
+    },
+    "Sarrià-Sant Gervasi": {
+      "media_2018_eur_m2": 5099.305331787307,
+      "n_train": 2615
+    }
+  },
+  "ajuste_calibracion_eur": 0.0,
+  "evaluacion": {
+    "modelo": {
+      "n": 6985,
+      "mae_eur": 54605.1,
+      "rmse_eur": 84501.98,
+      "mediana_error_pct": 11.29,
+      "r2": 0.8952
+    },
+    "baseline_ciudad": {
+      "n": 6985,
+      "mae_eur": 92082.62,
+      "rmse_eur": 134701.98,
+      "mediana_error_pct": 19.96,
+      "r2": 0.7337
+    },
+    "baseline_distrito": {
+      "n": 6985,
+      "mae_eur": 75101.34,
+      "rmse_eur": 110639.43,
+      "mediana_error_pct": 16.38,
+      "r2": 0.8204
+    },
+    "cobertura_2018": 0.8102,
+    "ancho_mediano_2018_eur": 143864.76,
+    "n_train": 32596,
+    "n_calibracion": 6985,
+    "n_test": 6985,
+    "ablacion_sin_localizacion": {
+      "n": 6985,
+      "mae_eur": 66038.83,
+      "rmse_eur": 98306.25,
+      "mediana_error_pct": 14.35,
+      "r2": 0.8582
+    },
+    "simulacion_campos_app": {
+      "n": 6985,
+      "mae_eur": 63720.86,
+      "rmse_eur": 96870.6,
+      "mediana_error_pct": 13.36,
+      "r2": 0.8623
+    },
+    "espacial_distritos_nuevos": {
+      "n": 8612,
+      "mae_eur": 54243.0,
+      "rmse_eur": 80633.79,
+      "mediana_error_pct": 15.57,
+      "r2": 0.8121,
+      "distritos": [
+        "Ciutat Vella",
+        "Nou Barris"
+      ]
+    },
+    "temporal_q4_nuevos": {
+      "n": 16483,
+      "mae_eur": 57335.43,
+      "rmse_eur": 89777.25,
+      "mediana_error_pct": 11.39,
+      "r2": 0.8872
+    }
+  },
+  "flujo": {
+    "inicial": 61486,
+    "duplicados_asset_period": 14757,
+    "excluidos_por_rango_o_ubicacion": 49,
+    "final": 46566,
+    "sin_distrito": 114
+  },
+  "fecha_base": "2018",
+  "validacion_precios_actuales": false
+}

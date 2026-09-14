@@ -1,0 +1,82 @@
+{
+  "Ciutat Vella": {
+    "n": 948,
+    "mae_eur": 50464.5,
+    "rmse_eur": 75018.74,
+    "mediana_error_pct": 11.4,
+    "r2": 0.8502,
+    "cobertura_2018": 0.8143
+  },
+  "Eixample": {
+    "n": 1601,
+    "mae_eur": 64944.9,
+    "rmse_eur": 92616.64,
+    "mediana_error_pct": 11.19,
+    "r2": 0.843,
+    "cobertura_2018": 0.8057
+  },
+  "Gràcia": {
+    "n": 492,
+    "mae_eur": 54011.73,
+    "rmse_eur": 83943.83,
+    "mediana_error_pct": 10.6,
+    "r2": 0.8527,
+    "cobertura_2018": 0.8313
+  },
+  "Horta-Guinardó": {
+    "n": 476,
+    "mae_eur": 43762.23,
+    "rmse_eur": 62088.28,
+    "mediana_error_pct": 14.93,
+    "r2": 0.7993,
+    "cobertura_2018": 0.7584
+  },
+  "Les Corts": {
+    "n": 273,
+    "mae_eur": 62445.46,
+    "rmse_eur": 95104.81,
+    "mediana_error_pct": 10.23,
+    "r2": 0.9458,
+    "cobertura_2018": 0.8645
+  },
+  "Nou Barris": {
+    "n": 421,
+    "mae_eur": 28109.07,
+    "rmse_eur": 41993.39,
+    "mediana_error_pct": 11.66,
+    "r2": 0.7325,
+    "cobertura_2018": 0.8005
+  },
+  "Sant Andreu": {
+    "n": 446,
+    "mae_eur": 30512.94,
+    "rmse_eur": 42725.99,
+    "mediana_error_pct": 9.51,
+    "r2": 0.806,
+    "cobertura_2018": 0.8543
+  },
+  "Sant Martí": {
+    "n": 933,
+    "mae_eur": 44356.78,
+    "rmse_eur": 66777.37,
+    "mediana_error_pct": 10.99,
+    "r2": 0.8294,
+    "cobertura_2018": 0.8232
+  },
+  "Sants-Montjuïc": {
+    "n": 830,
+    "mae_eur": 40618.66,
+    "rmse_eur": 58314.16,
+    "mediana_error_pct": 11.02,
+    "r2": 0.6302,
+    "cobertura_2018": 0.8181
+  },
+  "Sarrià-Sant Gervasi": {
+    "n": 565,
+    "mae_eur": 114347.28,
+    "rmse_eur": 160188.35,
+    "mediana_error_pct": 12.86,
+    "r2": 0.8442,
+    "cobertura_2018": 0.754
+  }
+}
