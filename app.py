@@ -943,10 +943,12 @@ if tabV.activa:
                        f'{"+" if _v>=0 else "−"}{eur(abs(_v))}</text>'
                        f'<line x1="0" y1="{_y+23}" x2="560" y2="{_y+23}" '
                        f'stroke="{LINE}" opacity=".55"/>')
+        _desc = "; ".join(
+            "%s %s %s" % (n, "suma" if v >= 0 else "resta", eur(abs(v)))
+            for n, v in _ef)
         st.markdown(
             f'<svg viewBox="0 0 560 {_H}" width="100%" role="img" '
-            f'aria-label="Desglose: '
-            f'{"; ".join(f"{n} {'"'"'suma'"'"' if v>=0 else '"'"'resta'"'"'} {eur(abs(v))}" for n, v in _ef)}." '
+            f'aria-label="Desglose del precio. {_desc}." '
             f'style="display:block;max-width:640px">'
             f'<line x1="250" y1="0" x2="250" y2="{_H-8}" stroke="{INK}" '
             f'opacity=".3" stroke-dasharray="2 3"/>{_filas}</svg>'
