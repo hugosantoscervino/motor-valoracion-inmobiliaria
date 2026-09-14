@@ -510,6 +510,9 @@ def fila(a, la, lo, dm=None):
               "HASLIFT": lift, "HASTERRACE": terrace, "HASPARKINGSPACE": parking,
               "HASAIRCONDITIONING": air, "HASSWIMMINGPOOL": pool, "HASDOORMAN": doorman,
               "PERIOD": 201812})
+    # Derivadas: deben recalcularse como en el entrenamiento (modelado.preparar)
+    r["ANTIGUEDAD_2018"] = max(0, 2018 - year)
+    r["AREA_POR_HABITACION"] = a / max(rooms, 1)
     return {c: r.get(c, 0.0) for c in FEAT}
 
 
@@ -636,6 +639,8 @@ def por_distrito(ciudad, area, rooms, baths, year, d_metro, ext):
                   "HASLIFT": ext[0], "HASTERRACE": ext[1], "HASPARKINGSPACE": ext[2],
                   "HASAIRCONDITIONING": ext[3], "HASSWIMMINGPOOL": ext[4],
                   "HASDOORMAN": ext[5], "PERIOD": 201812})
+        r["ANTIGUEDAD_2018"] = max(0, 2018 - year)
+        r["AREA_POR_HABITACION"] = area / max(rooms, 1)
         filas.append({c: r.get(c, 0.0) for c in mt["features"]})
         nombres.append((d, v["factor"], v["estimado"]))
     u = np.exp(mo["q50"].predict(xgb.DMatrix(pd.DataFrame(filas)[mt["features"]].astype(float))))
@@ -1160,6 +1165,8 @@ if tabL.activa:
                                     ((_lo - clon) * KM *
                                      math.cos(math.radians(clat))) ** 2)),
                                 "PERIOD": 201812})
+                    _rr["ANTIGUEDAD_2018"] = max(0, 2018 - float(r["anio"]))
+                    _rr["AREA_POR_HABITACION"] = float(r["m2"]) / max(float(r["habitaciones"]), 1)
                     _rows.append({c: _rr.get(c, 0.0) for c in FEAT})
                     _facs.append(meta["distritos"].get(_d, {}).get(
                         "factor", meta["factor_ciudad"]))
